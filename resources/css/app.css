@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+html.dark {
+    color-scheme: dark;
+}
+
+html.dark .bg-white { background-color: var(--color-stone-900); }
+html.dark .bg-stone-50 { background-color: var(--color-stone-950); }
+html.dark .bg-stone-100 { background-color: var(--color-stone-900); }
+html.dark .bg-stone-200 { background-color: var(--color-stone-800); }
+html.dark .bg-stone-800 { background-color: var(--color-stone-700); }
+html.dark .text-stone-900 { color: var(--color-stone-100); }
+html.dark .text-stone-600 { color: var(--color-stone-300); }
+html.dark .text-stone-700 { color: var(--color-stone-200); }
+html.dark .text-stone-500 { color: var(--color-stone-400); }
+html.dark .text-orange-700,
+html.dark .text-orange-800 { color: var(--color-orange-300); }
+html.dark .text-emerald-700,
+html.dark .text-emerald-800,
+html.dark .text-emerald-900 { color: var(--color-emerald-300); }
+html.dark .text-red-600,
+html.dark .text-red-700,
+html.dark .text-red-800,
+html.dark .text-red-900 { color: var(--color-red-300); }
+html.dark .text-amber-700,
+html.dark .text-amber-800,
+html.dark .text-amber-900 { color: var(--color-amber-200); }
+html.dark .text-blue-700,
+html.dark .text-blue-900 { color: var(--color-blue-300); }
+html.dark .text-fuchsia-700 { color: var(--color-fuchsia-300); }
+html.dark .bg-orange-50,
+html.dark .bg-orange-100 { background-color: color-mix(in srgb, var(--color-orange-950) 80%, transparent); }
+html.dark .bg-emerald-50,
+html.dark .bg-emerald-100 { background-color: color-mix(in srgb, var(--color-emerald-950) 75%, transparent); }
+html.dark .bg-red-50,
+html.dark .bg-red-100,
+html.dark .bg-red-200 { background-color: color-mix(in srgb, var(--color-red-950) 75%, transparent); }
+html.dark .bg-amber-50,
+html.dark .bg-amber-100,
+html.dark .bg-amber-200 { background-color: color-mix(in srgb, var(--color-amber-950) 75%, transparent); }
+html.dark .bg-blue-50 { background-color: color-mix(in srgb, var(--color-blue-950) 75%, transparent); }
+html.dark .border-orange-200,
+html.dark .border-orange-300,
+html.dark .border-amber-200,
+html.dark .border-amber-300,
+html.dark .border-emerald-200,
+html.dark .border-emerald-300,
+html.dark .border-red-200,
+html.dark .border-red-300,
+html.dark .border-blue-200,
+html.dark .border-blue-300 { border-color: var(--color-stone-700); }
+html.dark .border-stone-100,
+html.dark .border-stone-200,
+html.dark .border-stone-300 { border-color: var(--color-stone-700); }
+html.dark input,
+html.dark select,
+html.dark textarea { background-color: var(--color-stone-950); color: var(--color-stone-100); }
+html.dark dialog { color: var(--color-stone-100); }
+html.dark .hover\:bg-stone-100:hover,
+html.dark .hover\:bg-white:hover { background-color: var(--color-stone-800); }
+html.dark .peer:checked ~ .peer-checked\:bg-orange-50 { background-color: var(--color-orange-950); }

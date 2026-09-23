@@ -1,0 +1,36 @@
+<section class="mx-auto max-w-5xl print:max-w-none">
+    <div class="text-center print:hidden"><p class="text-sm font-semibold uppercase tracking-widest text-orange-700">Control de asistencia</p><h1 class="mt-2 text-4xl font-black">Hola, {{ $employee->name }}</h1><p class="mt-2 text-stone-600">{{ now()->translatedFormat('l, d \d\e F \d\e Y') }}</p><p data-clock-now class="mt-4 font-mono text-5xl font-black tabular-nums">{{ now()->format('H:i:s') }}</p></div>
+
+    @if(session('status'))<p class="mx-auto mt-6 max-w-xl rounded-2xl bg-emerald-50 p-4 text-center font-bold text-emerald-800 print:hidden">{{ session('status') }}</p>@endif
+    @error('clock')<p class="mx-auto mt-6 max-w-xl rounded-2xl bg-red-50 p-4 text-center font-bold text-red-700 print:hidden">{{ $message }}</p>@enderror
+
+    <div class="mx-auto mt-8 max-w-xl rounded-3xl border border-stone-200 bg-white p-7 text-center shadow-sm print:hidden">
+        @if($openEntry)
+            <p class="text-sm font-bold uppercase tracking-wide text-emerald-700">Jornada en curso</p><p class="mt-2 text-stone-600">Entrada registrada a las <strong>{{ $openEntry->clocked_in_at->format('H:i:s') }}</strong></p><button wire:click="clockOut" wire:confirm="¿Confirmas el fichaje de salida?" class="mt-6 w-full rounded-2xl bg-red-700 px-6 py-5 text-xl font-black text-white">Fichar salida</button>
+        @else
+            <p class="text-sm font-bold uppercase tracking-wide text-stone-500">Fuera de jornada</p><p class="mt-2 text-stone-600">Pulsa el botón cuando comiences a trabajar.</p><button wire:click="clockIn" wire:confirm="¿Confirmas el fichaje de entrada?" class="mt-6 w-full rounded-2xl bg-emerald-700 px-6 py-5 text-xl font-black text-white">Fichar entrada</button>
+        @endif
+    </div>
+
+    <section wire:poll.30s class="mt-12 print:mt-0">
+        <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p class="text-sm font-bold uppercase tracking-widest text-orange-700 print:text-stone-600">Horario personal</p><h2 class="mt-1 text-3xl font-black">Mi horario semanal</h2><p class="mt-2 text-stone-600">{{ $employee->name }} · {{ $employee->jobPosition?->name ?? 'Sin puesto asignado' }}</p></div><div class="flex items-center gap-3 print:hidden"><span class="rounded-full bg-orange-100 px-4 py-2 text-sm font-bold text-orange-800">{{ intdiv($weeklyMinutes, 60) }} h {{ $weeklyMinutes % 60 ? ($weeklyMinutes % 60).' min' : '' }} semanales</span><button type="button" onclick="window.print()" class="rounded-xl bg-stone-900 px-5 py-3 font-bold text-white">Imprimir horario</button></div></div>
+        <div class="hidden border-b-2 border-stone-900 pb-4 pt-2 print:block"><p class="text-sm">Horario semanal actualizado el {{ now()->format('d/m/Y H:i') }}</p><p class="mt-1 font-bold">Total planificado: {{ intdiv($weeklyMinutes, 60) }} h {{ $weeklyMinutes % 60 ? ($weeklyMinutes % 60).' min' : '' }}</p></div>
+
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 print:grid-cols-2">
+            @foreach([1=>'Lunes',2=>'Martes',3=>'Miércoles',4=>'Jueves',5=>'Viernes',6=>'Sábado',0=>'Domingo'] as $day=>$label)
+                @php($dayPeriods = $schedule->get($day, collect()))
+                <article class="break-inside-avoid rounded-2xl border p-5 {{ now()->dayOfWeek === $day ? 'border-orange-500 bg-orange-50 ring-2 ring-orange-200' : 'border-stone-200 bg-white' }} print:border-stone-400 print:bg-white print:ring-0">
+                    <div class="flex items-center justify-between gap-2"><h3 class="text-lg font-black">{{ $label }}</h3>@if(now()->dayOfWeek === $day)<span class="rounded-full bg-orange-700 px-2.5 py-1 text-xs font-bold text-white print:hidden">Hoy</span>@endif</div>
+                    @forelse($dayPeriods as $period)
+                        <div class="mt-3 rounded-xl bg-stone-100 px-3 py-3"><span class="block text-xs font-bold uppercase tracking-wide text-stone-500">Turno {{ $loop->iteration }}</span><strong class="mt-1 block font-mono text-lg">{{ substr($period->starts_at, 0, 5) }}–{{ substr($period->ends_at, 0, 5) }}</strong>@if(substr($period->ends_at,0,5) <= substr($period->starts_at,0,5))<small class="text-stone-500">Termina al día siguiente</small>@endif</div>
+                    @empty
+                        <div class="mt-3 rounded-xl border border-dashed border-stone-300 px-3 py-5 text-center"><strong class="text-stone-500">Descanso</strong></div>
+                    @endforelse
+                </article>
+            @endforeach
+        </div>
+        <p class="mt-4 text-sm text-stone-500 print:hidden">Los datos se comprueban automáticamente cada 30 segundos. Si observas un error, comunícaselo a un administrador.</p>
+    </section>
+
+    <section class="mt-12 print:hidden"><h2 class="text-xl font-bold">Últimos fichajes</h2><div class="mt-3 overflow-hidden rounded-2xl border border-stone-200 bg-white"><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-stone-100 text-stone-600"><tr><th class="px-4 py-3">Fecha</th><th class="px-4 py-3">Entrada</th><th class="px-4 py-3">Salida</th><th class="px-4 py-3 text-right">Duración</th></tr></thead><tbody class="divide-y divide-stone-100">@forelse($entries as $entry)<tr><td class="px-4 py-4">{{ $entry->clocked_in_at->format('d/m/Y') }}</td><td class="px-4 py-4 font-mono">{{ $entry->clocked_in_at->format('H:i:s') }}</td><td class="px-4 py-4 font-mono">{{ $entry->clocked_out_at?->format('H:i:s') ?? 'En curso' }}</td><td class="px-4 py-4 text-right">{{ $entry->clocked_out_at ? $entry->clocked_in_at->diff($entry->clocked_out_at)->format('%H:%I') : '—' }}</td></tr>@empty<tr><td colspan="4" class="px-4 py-10 text-center text-stone-500">Aún no hay fichajes.</td></tr>@endforelse</tbody></table></div></div></section>
+</section>

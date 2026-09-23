@@ -1,0 +1,52 @@
+name: Calidad
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v6
+
+      - name: Preparar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, intl, pdo_sqlite, dom, fileinfo
+          coverage: none
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Validar Composer
+        run: composer validate --strict
+
+      - name: Instalar dependencias PHP
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Comprobar formato PHP
+        run: vendor/bin/pint --test
+
+      - name: Ejecutar pruebas
+        run: php artisan test
+
+      - name: Instalar dependencias frontend
+        run: npm ci
+
+      - name: Compilar frontend
+        run: npm run build
