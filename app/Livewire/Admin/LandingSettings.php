@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Events\LandingUpdated;
 use App\Models\Product;
 use App\Models\SiteSetting;
 use App\Models\Testimonial;
@@ -104,6 +105,7 @@ class LandingSettings extends Component
             Product::query()->update(['featured_on_landing' => false]);
             Product::query()->whereKey($data['featuredProducts'])->update(['featured_on_landing' => true]);
         });
+        LandingUpdated::dispatch();
         session()->flash('status', 'Landing actualizada correctamente.');
     }
 
@@ -123,6 +125,7 @@ class LandingSettings extends Component
             'comment' => $data['testimonialComment'], 'sort_order' => $data['testimonialOrder'], 'is_active' => $data['testimonialActive'],
             'moderation_status' => $data['testimonialActive'] ? 'published' : ($testimonial->moderation_status ?: 'pending'),
         ])->save();
+        LandingUpdated::dispatch();
         $this->resetTestimonial();
         session()->flash('status', 'Testimonio guardado.');
     }
@@ -147,6 +150,7 @@ class LandingSettings extends Component
             Storage::disk('public')->delete($testimonial->profile_photo_path);
         }
         $testimonial->delete();
+        LandingUpdated::dispatch();
         $this->resetTestimonial();
     }
 
@@ -157,6 +161,7 @@ class LandingSettings extends Component
             'moderation_status' => 'published',
             'is_active' => true,
         ]);
+        LandingUpdated::dispatch();
         session()->flash('status', 'Reseña aprobada y publicada.');
     }
 
@@ -167,6 +172,7 @@ class LandingSettings extends Component
             'moderation_status' => 'rejected',
             'is_active' => false,
         ]);
+        LandingUpdated::dispatch();
         session()->flash('status', 'Reseña rechazada y ocultada.');
     }
 

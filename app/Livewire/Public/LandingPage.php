@@ -11,6 +11,7 @@ use App\Support\ModuleManager;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class LandingPage extends Component
@@ -40,6 +41,12 @@ class LandingPage extends Component
     public function mount(): void
     {
         $this->date = today()->toDateString();
+    }
+
+    #[On('landing-updated')]
+    public function refreshLanding(): void
+    {
+        // Receiving the event causes Livewire to render the latest public content.
     }
 
     public function reserve(CreatePublicReservation $creator): void

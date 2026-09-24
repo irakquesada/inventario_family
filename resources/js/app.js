@@ -132,7 +132,13 @@ document.addEventListener('DOMContentLoaded', initializeProductCarousels);
 document.addEventListener('livewire:navigated', initializeProductCarousels);
 
 document.addEventListener('livewire:init', () => {
-    if (import.meta.env.VITE_REALTIME_ENABLED !== 'true' || !document.querySelector('meta[name="app-authenticated"]')) return;
+    if (import.meta.env.VITE_REALTIME_ENABLED !== 'true') return;
+
+    window.Echo.channel('landing').listen('.landing.updated', (event) => {
+        Livewire.dispatch('landing-updated', event);
+    });
+
+    if (!document.querySelector('meta[name="app-authenticated"]')) return;
 
     window.Echo.private('inventory').listen('.inventory.changed', (event) => {
         Livewire.dispatch('inventory-changed', event);

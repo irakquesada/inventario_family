@@ -43,7 +43,8 @@ class AuthenticationTest extends TestCase
         $this->get('/iniciar-sesion')
             ->assertOk()
             ->assertSee('https://challenges.cloudflare.com/turnstile/v0/api.js', false)
-            ->assertSee('data-sitekey="public-site-key"', false);
+            ->assertSee('data-sitekey="public-site-key"', false)
+            ->assertSee('data-appearance="always"', false);
     }
 
     public function test_login_is_rejected_when_turnstile_validation_fails(): void

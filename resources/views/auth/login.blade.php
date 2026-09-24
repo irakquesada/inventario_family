@@ -35,7 +35,7 @@
             </label>
             <label class="flex items-center gap-2 text-sm"><input name="remember" type="checkbox" value="1"> Mantener la sesión</label>
             @if (config('services.turnstile.enabled'))
-                <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-theme="auto" data-language="es" data-appearance="interaction-only"></div>
+                <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-theme="auto" data-language="es" data-appearance="always"></div>
                 <noscript><p class="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Activa JavaScript para completar la comprobación de seguridad.</p></noscript>
             @endif
             @if ($errors->any())<p class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ $errors->first() }}</p>@endif
