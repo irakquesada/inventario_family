@@ -144,6 +144,70 @@ La activación se controla con `BROADCAST_CONNECTION=reverb` y `VITE_REALTIME_EN
 php artisan reverb:restart
 ```
 
+### Producción con Apache y systemd
+
+No ejecutes `composer run dev`, `npm run dev` ni `php artisan serve` en producción. Si existe `public/hot`, Laravel intentará cargar Vite desde el puerto 5173 aunque el frontend esté compilado. El despliegue debe eliminarlo y generar archivos estáticos:
+
+```bash
+rm -f public/hot
+npm ci
+npm run build
+php artisan optimize
+```
+
+Para `https://floopware.com/inventario_pro`, configura el `.env` antes de compilar, porque las variables `VITE_*` se incorporan al JavaScript generado:
+
+```dotenv
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://floopware.com/inventario_pro
+ASSET_URL=https://floopware.com/inventario_pro
+
+BROADCAST_CONNECTION=reverb
+QUEUE_CONNECTION=database
+VITE_REALTIME_ENABLED=true
+REVERB_APP_ID=valor-aleatorio
+REVERB_APP_KEY=valor-aleatorio
+REVERB_APP_SECRET=valor-aleatorio
+REVERB_SERVER_HOST=127.0.0.1
+REVERB_SERVER_PORT=8080
+REVERB_HOST=floopware.com
+REVERB_PORT=443
+REVERB_SCHEME=https
+REVERB_ALLOWED_ORIGINS=https://floopware.com
+VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+VITE_REVERB_HOST="${REVERB_HOST}"
+VITE_REVERB_PORT="${REVERB_PORT}"
+VITE_REVERB_SCHEME="${REVERB_SCHEME}"
+```
+
+El repositorio incluye unidades listas en `deploy/systemd`, la entrada de cron en `deploy/cron` y el proxy WebSocket de ejemplo en `deploy/apache`. Instálalos con:
+
+```bash
+sudo cp deploy/systemd/inventario-pro-queue.service /etc/systemd/system/
+sudo cp deploy/systemd/inventario-pro-reverb.service /etc/systemd/system/
+sudo cp deploy/cron/inventario-pro /etc/cron.d/inventario-pro
+sudo chmod 644 /etc/cron.d/inventario-pro
+sudo systemctl daemon-reload
+sudo systemctl enable --now inventario-pro-queue inventario-pro-reverb
+```
+
+Las directivas de `deploy/apache/reverb-proxy.conf.example` deben añadirse dentro del `VirtualHost *:443` de `floopware.com`. Luego valida y activa todo:
+
+```bash
+sudo a2enmod proxy proxy_http proxy_wstunnel
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+sudo systemctl status inventario-pro-queue inventario-pro-reverb --no-pager
+php artisan schedule:list
+```
+
+Tras actualizar el código, reinicia los procesos de larga duración para que carguen la nueva versión:
+
+```bash
+sudo systemctl restart inventario-pro-queue inventario-pro-reverb
+```
+
 ## Comprobaciones del proyecto
 
 Antes de integrar cambios importantes:

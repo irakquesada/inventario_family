@@ -1,0 +1,17 @@
+[Unit]
+Description=Inventario Pro - Laravel Reverb WebSocket server
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/floopware/inventario_pro
+ExecStart=/usr/bin/php artisan reverb:start --host=127.0.0.1 --port=8080 --no-interaction
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

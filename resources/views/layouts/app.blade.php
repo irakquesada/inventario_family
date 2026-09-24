@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="{{ config('brand.primary_color') }}">
     <meta name="app-authenticated" content="true">
+    <meta name="app-url" content="{{ url('/') }}">
     <title>{{ $title ?? 'Panel' }} · {{ config('brand.name') }}</title>
     <script>
         (() => {
