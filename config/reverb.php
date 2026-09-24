@@ -83,7 +83,18 @@ return [
                     'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
                 ],
                 'allowed_origins' => array_values(array_filter(array_map(
-                    'trim',
+                    static function (string $origin): string {
+                        $origin = trim($origin);
+
+                        if ($origin === '*') {
+                            return $origin;
+                        }
+
+                        return parse_url(
+                            str_contains($origin, '://') ? $origin : 'https://'.$origin,
+                            PHP_URL_HOST
+                        ) ?: $origin;
+                    },
                     explode(',', env('REVERB_ALLOWED_ORIGINS', '*'))
                 ))),
                 'ping_interval' => env('REVERB_APP_PING_INTERVAL', 60),
