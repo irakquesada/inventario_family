@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\SiteSetting;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,5 +38,18 @@ class LayoutResponsiveTest extends TestCase
         $this->assertStringContainsString('html.dark .bg-red-100', $css);
         $this->assertStringContainsString('html.dark .text-amber-900', $css);
         $this->assertStringContainsString('html.dark .text-blue-900', $css);
+    }
+
+    public function test_public_layout_has_a_mobile_menu_and_hides_reservations_when_disabled(): void
+    {
+        SiteSetting::query()->firstOrFail()->update(['reservations_enabled' => false]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('data-app-menu-open', false)
+            ->assertSee('data-app-menu-close', false)
+            ->assertSee('data-public-reservation-link', false)
+            ->assertSee('nav_reservar', false)
+            ->assertSee('hidden', false);
     }
 }

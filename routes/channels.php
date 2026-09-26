@@ -7,3 +7,4 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 });
 
 Broadcast::channel('inventory', fn ($user) => $user->can('inventory.view'));
+Broadcast::channel('analytics', fn ($user) => $user->can('audit.view'));

@@ -5,6 +5,7 @@ namespace App\Livewire\Reservations;
 use App\Models\Reservation;
 use App\Models\ReservationResource;
 use App\Services\Reservations\CreateReservation;
+use App\Support\ReservationCustomerNotifier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -86,7 +87,7 @@ class ReservationsIndex extends Component
         session()->flash('status', "Reserva {$reservation->reference} creada correctamente.");
     }
 
-    public function changeStatus(int $reservationId, string $status): void
+    public function changeStatus(int $reservationId, string $status, ReservationCustomerNotifier $customerNotifier): void
     {
         abort_unless(auth()->user()?->can('reservations.manage'), 403);
         $transitions = [
@@ -94,7 +95,7 @@ class ReservationsIndex extends Component
             'confirmed' => ['seated', 'cancelled', 'no_show'],
             'seated' => ['completed', 'cancelled'],
         ];
-        DB::transaction(function () use ($reservationId, $status, $transitions): void {
+        $reservation = DB::transaction(function () use ($reservationId, $status, $transitions): Reservation {
             $reservation = Reservation::query()->whereKey($reservationId)->lockForUpdate()->firstOrFail();
             abort_unless(in_array($status, $transitions[$reservation->status] ?? [], true), 422);
             $reservation->update([
@@ -102,7 +103,12 @@ class ReservationsIndex extends Component
                 'cancelled_at' => $status === 'cancelled' ? now() : null,
                 'cancelled_by' => $status === 'cancelled' ? auth()->id() : null,
             ]);
+
+            return $reservation;
         });
+        if (in_array($status, ['confirmed', 'cancelled'], true)) {
+            $customerNotifier->send($reservation, $status);
+        }
         session()->flash('status', 'Estado de la reserva actualizado.');
     }
 

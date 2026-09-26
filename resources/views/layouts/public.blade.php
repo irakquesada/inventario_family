@@ -5,28 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="{{ config('brand.primary_color') }}">
     <meta name="app-public" content="true">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="analytics-endpoint" content="{{ route('public.analytics.store') }}">
     <title>{{ $title }} · {{ config('brand.name') }}</title>
     <meta name="description" content="{{ config('brand.name') }}: productos, contacto, horarios y reservas.">
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 <body class="bg-stone-50 text-stone-900">
     @php($publicModules = app(App\Support\ModuleManager::class))
+    @php($publicSettings = App\Models\SiteSetting::query()->first())
+    @php($publicReservationsEnabled = $publicModules->enabled('reservations') && ($publicSettings?->reservations_enabled ?? false))
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 text-stone-900 shadow-sm backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-            <a href="{{ route('home') }}#inicio" class="text-xl font-black text-stone-950">{{ config('brand.name') }}</a>
+            <a href="{{ route('home') }}#inicio" data-analytics-event="nav_inicio" class="text-xl font-black text-stone-950">{{ config('brand.name') }}</a>
             <nav class="hidden items-center gap-5 text-sm font-semibold text-stone-800 md:flex">
-                @if($publicModules->enabled('inventory'))<a class="hover:text-orange-700" href="{{ route('public.products') }}">Productos</a>@endif
-                <a class="hover:text-orange-700" href="{{ route('home') }}#horarios">Horarios</a>
-                <a class="hover:text-orange-700" href="{{ route('home') }}#contacto">Contacto</a>
-                @if($publicModules->enabled('reservations'))<a href="{{ route('home') }}#reservar" class="rounded-full bg-orange-700 px-4 py-2 text-white">Reservar</a>@endif
+                @if($publicModules->enabled('inventory'))<a data-analytics-event="nav_productos" class="hover:text-orange-700" href="{{ route('public.products') }}">Productos</a>@endif
+                <a data-analytics-event="nav_horarios" class="hover:text-orange-700" href="{{ route('home') }}#horarios">Horarios</a>
+                <a data-analytics-event="nav_contacto" class="hover:text-orange-700" href="{{ route('home') }}#contacto">Contacto</a>
+                <a data-public-reservation-link data-analytics-event="nav_reservar" href="{{ route('home') }}#reservar" class="rounded-full bg-orange-700 px-4 py-2 text-white {{ $publicReservationsEnabled ? '' : 'hidden' }}">Reservar</a>
                 <a href="{{ route('login') }}" class="text-orange-700">Iniciar sesión</a>
             </nav>
-            @if($publicModules->enabled('reservations'))<a href="{{ route('home') }}#reservar" class="rounded-full bg-orange-700 px-4 py-2 text-sm font-bold text-white md:hidden">Reservar</a>@endif
+            <button type="button" data-app-menu-open class="rounded-xl border border-stone-300 bg-white px-3 py-2 font-bold md:hidden" aria-label="Abrir navegación" aria-haspopup="dialog">☰ Menú</button>
         </div>
     </header>
+    <dialog data-app-menu class="m-0 ml-auto h-dvh max-h-none w-[min(88vw,24rem)] max-w-none bg-white p-0 text-stone-900 shadow-2xl backdrop:bg-black/65">
+        <div class="flex min-h-full flex-col"><div class="flex items-center justify-between border-b border-stone-200 p-4"><strong>{{ config('brand.name') }}</strong><button type="button" data-app-menu-close class="rounded-xl border border-stone-300 px-3 py-2 font-bold">✕ Cerrar</button></div><nav class="grid gap-2 p-4 text-base font-bold"> <a data-app-menu-close data-analytics-event="nav_inicio_mobile" class="rounded-xl px-4 py-3 hover:bg-stone-100" href="{{ route('home') }}#inicio">Inicio</a>@if($publicModules->enabled('inventory'))<a data-app-menu-close data-analytics-event="nav_productos_mobile" class="rounded-xl px-4 py-3 hover:bg-stone-100" href="{{ route('public.products') }}">Productos</a>@endif<a data-app-menu-close data-analytics-event="nav_horarios_mobile" class="rounded-xl px-4 py-3 hover:bg-stone-100" href="{{ route('home') }}#horarios">Horarios</a><a data-app-menu-close data-analytics-event="nav_contacto_mobile" class="rounded-xl px-4 py-3 hover:bg-stone-100" href="{{ route('home') }}#contacto">Contacto</a><a data-public-reservation-link data-app-menu-close data-analytics-event="nav_reservar_mobile" class="rounded-xl bg-orange-700 px-4 py-3 text-white {{ $publicReservationsEnabled ? '' : 'hidden' }}" href="{{ route('home') }}#reservar">Reservar</a><a class="rounded-xl px-4 py-3 text-orange-700 hover:bg-orange-50" href="{{ route('login') }}">Iniciar sesión</a></nav></div>
+    </dialog>
     <main>{{ $slot ?? '' }}@yield('content')</main>
     <footer class="border-t border-stone-200 bg-stone-950 text-stone-300">
-        @php($publicSettings = App\Models\SiteSetting::query()->first())
         <div class="mx-auto flex max-w-7xl flex-col justify-between gap-4 px-4 py-8 text-sm sm:flex-row sm:items-center sm:px-6">
             <p>© {{ now()->year }} {{ config('brand.name') }}</p>
             <div class="flex flex-wrap gap-x-5 gap-y-2">@if($publicSettings?->privacy_policy)<a href="{{ route('public.privacy') }}" class="hover:text-white">Privacidad</a>@endif @if($publicSettings?->legal_notice)<a href="{{ route('public.legal-notice') }}" class="hover:text-white">Aviso legal</a>@endif<a href="{{ route('login') }}" class="font-semibold text-white">Acceso del equipo</a></div>

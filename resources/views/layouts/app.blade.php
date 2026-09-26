@@ -30,6 +30,7 @@
                 @can('audit.view')
                     <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.access-logs.index') }}">Accesos</a>
                     <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.activity-logs.index') }}">Auditoría</a>
+                    <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.analytics.index') }}">Analítica</a>
                 @endcan
                 @can('users.manage')
                     <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.users.index') }}">Usuarios</a>
@@ -78,7 +79,7 @@
                     <a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('dashboard') }}">Panel</a>
                     @if($moduleManager->enabled('reservations')) @can('reservations.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('reservations.index') }}">Reservas</a>@endcan @endif
                     @can('audit.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.access-logs.index') }}">Registro de accesos</a>@endcan
-                    @can('audit.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.activity-logs.index') }}">Auditoría de operaciones</a>@endcan
+                    @can('audit.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.activity-logs.index') }}">Auditoría de operaciones</a><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.analytics.index') }}">Analítica pública</a>@endcan
                     @can('users.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.users.index') }}">Usuarios</a>@endcan
                     @if($moduleManager->enabled('landing')) @can('content.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.landing.settings') }}">Landing pública</a>@endcan @endif
                     @if($moduleManager->enabled('people'))

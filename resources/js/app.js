@@ -131,10 +131,54 @@ function initializeProductCarousels() {
 document.addEventListener('DOMContentLoaded', initializeProductCarousels);
 document.addEventListener('livewire:navigated', initializeProductCarousels);
 
+function recordPublicAnalytics(eventType, { label = null, productId = null } = {}) {
+    const endpoint = document.querySelector('meta[name="analytics-endpoint"]')?.content;
+    const token = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (!endpoint || !token) return;
+    fetch(endpoint, {
+        method: 'POST',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, Accept: 'application/json' },
+        body: JSON.stringify({ event_type: eventType, path: `${location.pathname}${location.hash}`, label, product_id: productId }),
+    }).catch(() => {});
+}
+
+document.addEventListener('click', (event) => {
+    const target = event.target.closest('[data-analytics-event], a[href*="#"]');
+    if (target) {
+        const hash = target.hash?.replace('#', '');
+        recordPublicAnalytics('click', { label: target.dataset.analyticsEvent || (hash ? `section_${hash}` : 'enlace_publico') });
+    }
+});
+
+let productObserver;
+function initializeProductAnalytics() {
+    productObserver ??= new IntersectionObserver((entries) => {
+        entries.filter((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.6).forEach((entry) => {
+            const productId = Number(entry.target.dataset.productImpression);
+            const key = `product-impression:${productId}:${location.pathname}`;
+            if (!sessionStorage.getItem(key)) {
+                sessionStorage.setItem(key, '1');
+                recordPublicAnalytics('product_view', { label: entry.target.dataset.productName, productId });
+            }
+            productObserver.unobserve(entry.target);
+        });
+    }, { threshold: 0.6 });
+    document.querySelectorAll('[data-product-impression]:not([data-analytics-ready])').forEach((product) => {
+        product.dataset.analyticsReady = 'true';
+        productObserver.observe(product);
+    });
+}
+document.addEventListener('DOMContentLoaded', initializeProductAnalytics);
+document.addEventListener('livewire:navigated', initializeProductAnalytics);
+
 document.addEventListener('livewire:init', () => {
     if (import.meta.env.VITE_REALTIME_ENABLED !== 'true') return;
 
     window.Echo.channel('landing').listen('.landing.updated', (event) => {
+        document.querySelectorAll('[data-public-reservation-link]').forEach((link) => {
+            link.classList.toggle('hidden', !event.reservations_enabled);
+        });
         Livewire.dispatch('landing-updated', event);
     });
 
@@ -142,6 +186,9 @@ document.addEventListener('livewire:init', () => {
 
     window.Echo.private('inventory').listen('.inventory.changed', (event) => {
         Livewire.dispatch('inventory-changed', event);
+    });
+    window.Echo.private('analytics').listen('.analytics.recorded', () => {
+        Livewire.dispatch('analytics-recorded');
     });
 });
 

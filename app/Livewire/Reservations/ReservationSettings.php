@@ -5,6 +5,8 @@ namespace App\Livewire\Reservations;
 use App\Models\BusinessClosure;
 use App\Models\BusinessHour;
 use App\Models\ReservationResource;
+use App\Models\SiteSetting;
+use App\Support\ReservationMailTemplates;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -33,6 +35,16 @@ class ReservationSettings extends Component
 
     public string $closureReason = '';
 
+    public string $mailFromName = '';
+
+    public string $mailFromAddress = '';
+
+    public string $mailReceived = '';
+
+    public string $mailConfirmed = '';
+
+    public string $mailCancelled = '';
+
     public function mount(): void
     {
         foreach (range(0, 6) as $day) {
@@ -42,6 +54,40 @@ class ReservationSettings extends Component
                     'closes_at' => substr($hour->closes_at, 0, 5),
                 ])->values()->all();
         }
+        $settings = SiteSetting::query()->firstOrCreate([], ['hero_title' => config('brand.name')]);
+        $this->mailFromName = $settings->reservation_mail_from_name ?: config('mail.from.name');
+        $this->mailFromAddress = $settings->reservation_mail_from_address ?: config('mail.from.address');
+        $this->mailReceived = $settings->reservation_mail_received ?: ReservationMailTemplates::RECEIVED;
+        $this->mailConfirmed = $settings->reservation_mail_confirmed ?: ReservationMailTemplates::CONFIRMED;
+        $this->mailCancelled = $settings->reservation_mail_cancelled ?: ReservationMailTemplates::CANCELLED;
+    }
+
+    public function saveMailSettings(): void
+    {
+        $this->authorizeConfiguration();
+        $data = $this->validate([
+            'mailFromName' => ['nullable', 'string', 'max:255'],
+            'mailFromAddress' => ['nullable', 'email', 'max:255'],
+            'mailReceived' => ['required', 'string', 'max:5000'],
+            'mailConfirmed' => ['required', 'string', 'max:5000'],
+            'mailCancelled' => ['required', 'string', 'max:5000'],
+        ]);
+        SiteSetting::query()->firstOrFail()->update([
+            'reservation_mail_from_name' => $data['mailFromName'] ?: null,
+            'reservation_mail_from_address' => $data['mailFromAddress'] ?: null,
+            'reservation_mail_received' => $data['mailReceived'],
+            'reservation_mail_confirmed' => $data['mailConfirmed'],
+            'reservation_mail_cancelled' => $data['mailCancelled'],
+        ]);
+        session()->flash('status', 'Correo de reservas actualizado.');
+    }
+
+    public function resetMailTemplates(): void
+    {
+        $this->authorizeConfiguration();
+        $this->mailReceived = ReservationMailTemplates::RECEIVED;
+        $this->mailConfirmed = ReservationMailTemplates::CONFIRMED;
+        $this->mailCancelled = ReservationMailTemplates::CANCELLED;
     }
 
     public function addPeriod(int $day): void

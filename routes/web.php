@@ -1,12 +1,15 @@
 <?php
 
+use App\Http\Controllers\Admin\AnalyticsExportController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Inventory\ProductCsvController;
 use App\Http\Controllers\People\AbsenceAttachmentController;
 use App\Http\Controllers\People\AttendanceExportController;
 use App\Http\Controllers\Site\LegalPageController;
+use App\Http\Controllers\Site\PublicAnalyticsController;
 use App\Livewire\Admin\AccessLogsIndex;
 use App\Livewire\Admin\ActivityLogsIndex;
+use App\Livewire\Admin\AnalyticsDashboard;
 use App\Livewire\Admin\LandingSettings;
 use App\Livewire\Admin\PlatformModules;
 use App\Livewire\Admin\UsersIndex;
@@ -41,8 +44,9 @@ use App\Livewire\Reservations\ReservationSettings;
 use App\Livewire\Reservations\ReservationsIndex;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', LandingPage::class)->middleware('module:landing')->name('home');
-Route::get('/productos', ProductCatalog::class)->middleware(['module:landing', 'module:inventory'])->name('public.products');
+Route::get('/', LandingPage::class)->middleware(['module:landing', 'public-analytics'])->name('home');
+Route::get('/productos', ProductCatalog::class)->middleware(['module:landing', 'module:inventory', 'public-analytics'])->name('public.products');
+Route::post('/analitica/evento', [PublicAnalyticsController::class, 'store'])->middleware(['module:landing', 'throttle:120,1'])->name('public.analytics.store');
 Route::get('/politica-de-privacidad', [LegalPageController::class, 'privacy'])->middleware('module:landing')->name('public.privacy');
 Route::get('/aviso-legal', [LegalPageController::class, 'legalNotice'])->middleware('module:landing')->name('public.legal-notice');
 Route::get('/opinar/{token}', SubmitTestimonial::class)->middleware(['module:landing', 'throttle:30,1'])->name('public.testimonials.submit');
@@ -120,6 +124,12 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/administracion/operaciones', ActivityLogsIndex::class)
         ->middleware('can:audit.view')
         ->name('admin.activity-logs.index');
+    Route::get('/administracion/analitica', AnalyticsDashboard::class)
+        ->middleware('can:audit.view')
+        ->name('admin.analytics.index');
+    Route::get('/administracion/analitica/exportar', AnalyticsExportController::class)
+        ->middleware('can:audit.view')
+        ->name('admin.analytics.export');
     Route::get('/administracion/usuarios', UsersIndex::class)
         ->middleware('can:users.manage')
         ->name('admin.users.index');

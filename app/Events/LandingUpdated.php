@@ -2,6 +2,8 @@
 
 namespace App\Events;
 
+use App\Models\SiteSetting;
+use App\Support\ModuleManager;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
@@ -24,6 +26,11 @@ class LandingUpdated implements ShouldBroadcastNow
 
     public function broadcastWith(): array
     {
-        return ['updated_at' => now()->toIso8601String()];
+        $settings = SiteSetting::query()->first();
+
+        return [
+            'updated_at' => now()->toIso8601String(),
+            'reservations_enabled' => app(ModuleManager::class)->enabled('reservations') && ($settings?->reservations_enabled ?? false),
+        ];
     }
 }

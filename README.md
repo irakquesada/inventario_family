@@ -128,6 +128,14 @@ php artisan inventory:notify-expiring-lots
 php artisan schedule:list
 ```
 
+La analítica pública conserva los eventos durante 13 meses y elimina automáticamente los más antiguos el primer día de cada mes. Registra páginas, clics e impresiones visibles de producto, pero no guarda direcciones IP en claro ni textos introducidos por visitantes. Los administradores autorizados pueden consultar filtros y exportar CSV desde **Analítica**.
+
+## Correos de reservas
+
+Las credenciales del proveedor de correo siempre se configuran en `.env`. Desde **Reservas → Configuración → Correos al cliente** se puede cambiar el nombre y dirección visibles del remitente y editar las plantillas de solicitud recibida, confirmación y cancelación. Si no se personalizan, la aplicación utiliza textos seguros predeterminados y la identidad global `MAIL_FROM_*`.
+
+La dirección remitente personalizada debe estar autorizada por el proveedor SMTP. Los mensajes al cliente se envían mediante la cola, por lo que `inventario-pro-queue.service` debe permanecer activo.
+
 ## Tiempo real
 
 Livewire resuelve las operaciones de cada usuario sin recargar páginas. Reverb añade sincronización entre dispositivos: una entrada, salida, transferencia, recepción de compra o conciliación actualiza las pantallas abiertas de otros usuarios.
