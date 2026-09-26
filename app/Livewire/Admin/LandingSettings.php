@@ -6,8 +6,10 @@ use App\Events\LandingUpdated;
 use App\Models\Product;
 use App\Models\SiteSetting;
 use App\Models\Testimonial;
+use App\Support\MapLinks;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 class LandingSettings extends Component
@@ -29,6 +31,8 @@ class LandingSettings extends Component
     public string $address = '';
 
     public string $mapEmbedUrl = '';
+
+    public string $mapDirectionsUrl = '';
 
     public string $instagramUrl = '';
 
@@ -65,9 +69,12 @@ class LandingSettings extends Component
     public function mount(): void
     {
         $settings = SiteSetting::query()->firstOrCreate([], ['hero_title' => config('brand.name')]);
-        foreach (['heroTitle' => 'hero_title', 'heroSubtitle' => 'hero_subtitle', 'heroCta' => 'hero_cta', 'aboutTitle' => 'about_title', 'aboutText' => 'about_text', 'phone' => 'phone', 'email' => 'email', 'address' => 'address', 'mapEmbedUrl' => 'map_embed_url', 'instagramUrl' => 'instagram_url', 'facebookUrl' => 'facebook_url', 'jobsEmail' => 'jobs_email', 'privacyPolicy' => 'privacy_policy', 'legalNotice' => 'legal_notice'] as $property => $column) {
+        foreach (['heroTitle' => 'hero_title', 'heroSubtitle' => 'hero_subtitle', 'heroCta' => 'hero_cta', 'aboutTitle' => 'about_title', 'aboutText' => 'about_text', 'phone' => 'phone', 'email' => 'email', 'address' => 'address', 'instagramUrl' => 'instagram_url', 'facebookUrl' => 'facebook_url', 'jobsEmail' => 'jobs_email', 'privacyPolicy' => 'privacy_policy', 'legalNotice' => 'legal_notice'] as $property => $column) {
             $this->{$property} = (string) ($settings->{$column} ?? '');
         }
+        $legacyMapUrl = (string) ($settings->map_embed_url ?? '');
+        $this->mapEmbedUrl = MapLinks::isEmbeddable($legacyMapUrl) ? $legacyMapUrl : '';
+        $this->mapDirectionsUrl = (string) ($settings->map_directions_url ?: (MapLinks::isEmbeddable($legacyMapUrl) ? '' : $legacyMapUrl));
         $this->reservationsEnabled = $settings->reservations_enabled;
         $this->testimonialsEnabled = $settings->testimonials_enabled;
         $this->carouselEnabled = $settings->carousel_enabled;
@@ -83,19 +90,26 @@ class LandingSettings extends Component
             'heroCta' => ['required', 'string', 'max:60'], 'aboutTitle' => ['required', 'string', 'max:255'],
             'aboutText' => ['nullable', 'string', 'max:5000'], 'phone' => ['nullable', 'string', 'max:40'],
             'email' => ['nullable', 'email', 'max:255'], 'address' => ['nullable', 'string', 'max:1000'],
-            'mapEmbedUrl' => ['nullable', 'url:https', 'max:2000'], 'instagramUrl' => ['nullable', 'url:https', 'max:1000'],
+            'mapEmbedUrl' => ['nullable', 'url:https', 'max:2000'], 'mapDirectionsUrl' => ['nullable', 'url:https', 'max:2000'],
+            'instagramUrl' => ['nullable', 'url:https', 'max:1000'],
             'facebookUrl' => ['nullable', 'url:https', 'max:1000'], 'jobsEmail' => ['nullable', 'email', 'max:255'],
             'reservationsEnabled' => ['boolean'], 'testimonialsEnabled' => ['boolean'], 'jobsEnabled' => ['boolean'],
             'carouselEnabled' => ['boolean'],
             'privacyPolicy' => ['nullable', 'string', 'max:50000'], 'legalNotice' => ['nullable', 'string', 'max:50000'],
             'featuredProducts' => ['array', 'max:8'], 'featuredProducts.*' => ['integer', 'exists:products,id'],
         ]);
+        if ($data['mapEmbedUrl'] && ! MapLinks::isEmbeddable($data['mapEmbedUrl'])) {
+            throw ValidationException::withMessages([
+                'mapEmbedUrl' => 'Usa una URL de Google Maps preparada para insertar (output=embed o /maps/embed).',
+            ]);
+        }
         DB::transaction(function () use ($data): void {
             SiteSetting::query()->firstOrFail()->update([
                 'hero_title' => $data['heroTitle'], 'hero_subtitle' => $data['heroSubtitle'] ?: null, 'hero_cta' => $data['heroCta'],
                 'about_title' => $data['aboutTitle'], 'about_text' => $data['aboutText'] ?: null,
                 'phone' => $data['phone'] ?: null, 'email' => $data['email'] ?: null, 'address' => $data['address'] ?: null,
-                'map_embed_url' => $data['mapEmbedUrl'] ?: null, 'instagram_url' => $data['instagramUrl'] ?: null,
+                'map_embed_url' => $data['mapEmbedUrl'] ?: null, 'map_directions_url' => $data['mapDirectionsUrl'] ?: null,
+                'instagram_url' => $data['instagramUrl'] ?: null,
                 'facebook_url' => $data['facebookUrl'] ?: null, 'reservations_enabled' => $data['reservationsEnabled'],
                 'testimonials_enabled' => $data['testimonialsEnabled'], 'jobs_enabled' => $data['jobsEnabled'],
                 'carousel_enabled' => $data['carouselEnabled'],

@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\SiteSetting;
 use App\Models\Testimonial;
 use App\Services\Reservations\CreatePublicReservation;
+use App\Support\MapLinks;
 use App\Support\ModuleManager;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rule;
@@ -96,9 +97,8 @@ class LandingPage extends Component
             'settings' => $settings,
             'inventoryAvailable' => $modules->enabled('inventory'),
             'reservationsAvailable' => $modules->enabled('reservations'),
-            'mapEmbedUrl' => $settings->address
-                ? 'https://www.google.com/maps?q='.rawurlencode(str_replace("\n", ', ', $settings->address)).'&output=embed'
-                : null,
+            'mapEmbedUrl' => MapLinks::embedUrl($settings->map_embed_url, $settings->address),
+            'mapDirectionsUrl' => MapLinks::directionsUrl($settings->map_directions_url, $settings->map_embed_url, $settings->address),
             'products' => $modules->enabled('inventory')
                 ? Product::query()->with('category')->where('is_active', true)->where('featured_on_landing', true)->orderBy('name')->limit(8)->get()
                 : collect(),

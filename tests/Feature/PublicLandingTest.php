@@ -87,6 +87,33 @@ class PublicLandingTest extends TestCase
             ->assertSee('Carrer%20de%20Exemple', false);
     }
 
+    public function test_contact_section_uses_configured_embed_and_directions_urls(): void
+    {
+        SiteSetting::query()->firstOrFail()->update([
+            'map_embed_url' => 'https://www.google.com/maps?q=Madrid&output=embed',
+            'map_directions_url' => 'https://maps.google.com/?q=Madrid',
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('https://www.google.com/maps?q=Madrid&amp;output=embed', false)
+            ->assertSee('https://maps.google.com/?q=Madrid', false);
+    }
+
+    public function test_contact_section_always_has_a_map_fallback(): void
+    {
+        SiteSetting::query()->firstOrFail()->update([
+            'address' => null,
+            'map_embed_url' => null,
+            'map_directions_url' => null,
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Valencia%2C%20Spain', false)
+            ->assertSee('output=embed', false);
+    }
+
     public function test_landing_keeps_subtitle_and_presentation_and_only_shows_configured_social_links(): void
     {
         SiteSetting::query()->firstOrFail()->update([
