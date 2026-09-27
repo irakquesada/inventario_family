@@ -9,7 +9,7 @@
             @foreach($definitions as $key => $module)
                 <label class="flex cursor-pointer items-start gap-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm transition hover:border-orange-300"><input wire:model="modules.{{ $key }}" type="checkbox" class="mt-1 size-5"><span class="flex-1"><strong class="block text-lg">{{ $module['label'] }}</strong><span class="mt-1 block text-sm leading-6 text-stone-600">{{ $module['description'] }}</span><span class="mt-2 block text-xs font-semibold text-stone-500">Clave interna: {{ $key }}</span></span></label>
             @endforeach
-            <div class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900"><strong>Áreas esenciales siempre disponibles:</strong> inicio de sesión, usuarios, auditoría, historial de accesos, notificaciones y esta configuración. Las futuras áreas de nómina y tienda aparecerán aquí cuando estén implementadas.</div>
+            <div class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900"><strong>Áreas esenciales siempre disponibles:</strong> inicio de sesión, usuarios, auditoría, historial de accesos, notificaciones y esta configuración. La futura área de nómina aparecerá aquí cuando esté implementada.</div>
             <div class="flex flex-col gap-2 sm:flex-row"><button class="flex-1 rounded-xl bg-orange-700 px-5 py-4 text-lg font-bold text-white">Aplicar configuración</button><button type="button" wire:click="lock" class="rounded-xl border border-stone-300 bg-white px-5 py-4 font-semibold">Bloquear ahora</button></div>
         </form>
     @endif

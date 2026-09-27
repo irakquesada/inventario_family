@@ -27,6 +27,7 @@
                     <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('inventory.products.index') }}">Inventario</a>
                 @endcan @endif
                 @if($moduleManager->enabled('reservations')) @can('reservations.view')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('reservations.index') }}">Reservas</a>@endcan @endif
+                @if($moduleManager->enabled('sales')) @can('sales.view')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('sales.index') }}">Ventas</a>@endcan @endif
                 @can('audit.view')
                     <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.access-logs.index') }}">Accesos</a>
                     <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.activity-logs.index') }}">Auditoría</a>
@@ -78,6 +79,7 @@
                 <div class="mt-2 grid gap-1">
                     <a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('dashboard') }}">Panel</a>
                     @if($moduleManager->enabled('reservations')) @can('reservations.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('reservations.index') }}">Reservas</a>@endcan @endif
+                    @if($moduleManager->enabled('sales')) @can('sales.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('sales.index') }}">Ventas</a>@endcan @endif
                     @can('audit.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.access-logs.index') }}">Registro de accesos</a>@endcan
                     @can('audit.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.activity-logs.index') }}">Auditoría de operaciones</a><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.analytics.index') }}">Analítica pública</a>@endcan
                     @can('users.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.users.index') }}">Usuarios</a>@endcan
@@ -107,6 +109,10 @@
                         @can('inventory.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('inventory.purchase-orders.index') }}">Órdenes de compra</a>@endcan
                         <a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('inventory.lots.index') }}">Lotes y caducidad</a>
                     </div>
+                @endcan @endif
+                @if($moduleManager->enabled('sales')) @can('sales.view')
+                    <p class="mt-6 px-3 text-xs font-bold uppercase tracking-wide text-stone-500">Ventas</p>
+                    <div class="mt-2 grid gap-1"><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('sales.index') }}">Historial de ventas</a>@can('sales.create')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('sales.pos') }}">Punto de venta</a>@endcan</div>
                 @endcan @endif
             </nav>
             <div class="space-y-2 border-t border-stone-200 p-4">

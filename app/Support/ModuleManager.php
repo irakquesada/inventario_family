@@ -12,6 +12,7 @@ class ModuleManager
         'landing' => ['label' => 'Landing y catálogo público', 'description' => 'Web pública, catálogo, contenido, reseñas mediante QR y configuración de la landing.'],
         'reservations' => ['label' => 'Reservas', 'description' => 'Agenda, recursos, horarios, solicitudes públicas y configuración de reservas.'],
         'people' => ['label' => 'Personal y fichaje', 'description' => 'Empleados, puestos, horarios, asistencia, fichaje, ausencias y vacaciones.'],
+        'sales' => ['label' => 'Ventas y TPV', 'description' => 'Punto de venta, pedidos, tickets, formas de pago y devolución segura de existencias.'],
     ];
 
     private ?array $states = null;

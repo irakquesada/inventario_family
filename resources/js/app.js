@@ -190,6 +190,9 @@ document.addEventListener('livewire:init', () => {
     window.Echo.private('analytics').listen('.analytics.recorded', () => {
         Livewire.dispatch('analytics-recorded');
     });
+    window.Echo.private('sales').listen('.sales.changed', (event) => {
+        Livewire.dispatch('sales-changed', event);
+    });
 });
 
 document.addEventListener('click', (event) => {

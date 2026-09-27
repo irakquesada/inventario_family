@@ -2,6 +2,8 @@
 
 Núcleo modular para inventario, operaciones, reservas, catálogo y personal. La primera entrega prioriza el inventario y está diseñada para funcionar en móvil y ordenador.
 
+Incluye además un módulo de ventas/TPV activable: carrito táctil, cobro por almacén, tickets, historial, consumo FEFO y reembolsos auditables que restauran existencias sin alterar el movimiento original.
+
 ## Requisitos locales
 
 - PHP 8.3 o superior (desarrollo actual: 8.4)

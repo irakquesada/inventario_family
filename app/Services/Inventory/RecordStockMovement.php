@@ -28,7 +28,7 @@ class RecordStockMovement
     ): StockMovement {
         if ($product->tracks_lots && in_array($type, [
             'receipt', 'issue', 'adjustment', 'opening_balance', 'transfer_out',
-            'transfer_in', 'stocktake_adjustment', 'purchase_receipt',
+            'transfer_in', 'stocktake_adjustment', 'purchase_receipt', 'sale', 'sale_return',
         ], true) && ! ($metadata['lot_managed'] ?? false)) {
             throw ValidationException::withMessages([
                 'quantity' => 'Este producto requiere una operación gestionada por lotes.',

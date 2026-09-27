@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Inventory\ProductCsvController;
 use App\Http\Controllers\People\AbsenceAttachmentController;
 use App\Http\Controllers\People\AttendanceExportController;
+use App\Http\Controllers\Sales\SaleTicketController;
 use App\Http\Controllers\Site\LegalPageController;
 use App\Http\Controllers\Site\PublicAnalyticsController;
 use App\Livewire\Admin\AccessLogsIndex;
@@ -42,6 +43,8 @@ use App\Livewire\Public\ProductCatalog;
 use App\Livewire\Public\SubmitTestimonial;
 use App\Livewire\Reservations\ReservationSettings;
 use App\Livewire\Reservations\ReservationsIndex;
+use App\Livewire\Sales\PosTerminal;
+use App\Livewire\Sales\SalesIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingPage::class)->middleware(['module:landing', 'public-analytics'])->name('home');
@@ -146,6 +149,11 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/reservas/configuracion', ReservationSettings::class)
             ->middleware('can:reservations.configure')
             ->name('reservations.settings');
+    });
+    Route::middleware('module:sales')->group(function (): void {
+        Route::get('/ventas', SalesIndex::class)->middleware('can:sales.view')->name('sales.index');
+        Route::get('/ventas/tpv', PosTerminal::class)->middleware('can:sales.create')->name('sales.pos');
+        Route::get('/ventas/{sale}/ticket', SaleTicketController::class)->middleware('can:sales.view')->name('sales.ticket');
     });
     Route::middleware('module:people')->group(function (): void {
         Route::get('/personal', EmployeesIndex::class)->middleware('can:people.view')->name('people.employees.index');

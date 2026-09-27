@@ -86,6 +86,20 @@ Landing/catálogo, personal y venta, en ese orden.
 1. Recordatorios de reservas.
 2. Recuperación segura de contraseña.
 3. Instalador privado para nuevas implantaciones.
-4. Venta, pedidos o tienda en línea.
+4. Pedidos públicos y tienda en línea.
 5. Integración final con reseñas de Google.
 6. Documentos laborales, contratos y resumen mensual de nómina.
+
+## Fase 6 — Ventas y pedidos
+
+- [x] Módulo comercial activable y permisos separados de consulta, venta, gestión y reembolso.
+- [x] TPV responsive con buscador, categorías, lector físico, carrito, cliente opcional y formas de pago.
+- [x] Ventas numeradas con fotografía de producto, precio y coste.
+- [x] Descuento transaccional de existencias y consumo FEFO de lotes.
+- [x] Historial, responsable, estados, ticket imprimible y auditoría.
+- [x] Reembolsos autorizados con movimientos compensatorios y restauración de los lotes originales.
+- [x] Actualización en tiempo real de inventario y ventas mediante Reverb.
+- [ ] Pedidos públicos desde el catálogo, seguimiento y avisos al cliente.
+- [ ] Preparación, recogida, consumo en local y entrega.
+- [ ] Panel de métricas, cierre de caja y exportaciones comerciales.
+- [ ] Pasarela de pago externa.

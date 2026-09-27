@@ -135,6 +135,41 @@ class LotStock
         });
     }
 
+    public function restore(
+        StockMovement $originalMovement,
+        User $user,
+        string $reason,
+        array $metadata = [],
+        ?string $operationReference = null,
+    ): StockMovement {
+        $originalMovement->loadMissing(['product', 'warehouse', 'lotAllocations.lot']);
+        $this->ensureTracked($originalMovement->product);
+
+        return DB::transaction(function () use ($originalMovement, $user, $reason, $metadata, $operationReference): StockMovement {
+            $this->lockBalance($originalMovement->product, $originalMovement->warehouse);
+            $allocations = $originalMovement->lotAllocations()->with('lot')->lockForUpdate()->get();
+            $quantity = round((float) $allocations->sum(fn ($allocation) => abs((float) $allocation->quantity)), 3);
+            if ($quantity <= 0) {
+                throw ValidationException::withMessages(['refundReason' => 'No se encontraron lotes vinculados al movimiento original.']);
+            }
+
+            $movement = $this->recorder->handle(
+                $originalMovement->product, $originalMovement->warehouse, 'sale_return', $quantity, $user, $reason,
+                [...$metadata, 'lot_managed' => true, 'allocation_method' => 'ORIGINAL_SALE'], $operationReference,
+            );
+            foreach ($allocations as $allocation) {
+                $restored = abs((float) $allocation->quantity);
+                $lot = InventoryLot::query()->whereKey($allocation->inventory_lot_id)->lockForUpdate()->firstOrFail();
+                $lot->update(['quantity' => round((float) $lot->quantity + $restored, 3)]);
+                StockMovementLot::query()->create([
+                    'stock_movement_id' => $movement->id, 'inventory_lot_id' => $lot->id, 'quantity' => $restored,
+                ]);
+            }
+
+            return $movement;
+        });
+    }
+
     private function lockBalance(Product $product, Warehouse $warehouse): void
     {
         InventoryBalance::query()->firstOrCreate(
