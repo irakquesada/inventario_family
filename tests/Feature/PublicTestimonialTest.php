@@ -33,10 +33,33 @@ class PublicTestimonialTest extends TestCase
             ->call('generate')
             ->assertHasNoErrors()
             ->assertSet('generatedUrl', fn ($url) => str_contains($url, '/opinar/'))
-            ->assertSet('qrDataUri', fn ($uri) => str_starts_with($uri, 'data:image/svg+xml'));
+            ->assertSet('qrDataUri', fn ($uri) => str_starts_with($uri, 'data:image/svg+xml'))
+            ->assertSee('review-qr-print', false)
+            ->assertSee('Imprimir solo el QR');
 
         $this->assertDatabaseHas('review_invitations', ['label' => 'Mesa 4', 'max_submissions' => 2]);
         $this->assertNotNull(ReviewInvitation::first()->token_hash);
+    }
+
+    public function test_revoked_invitation_shows_a_friendly_public_page_instead_of_a_404(): void
+    {
+        $token = str_repeat('r', 64);
+        ReviewInvitation::query()->create([
+            'token_hash' => hash('sha256', $token), 'max_submissions' => 1,
+            'expires_at' => now()->addDay(), 'revoked_at' => now(),
+        ]);
+
+        $this->get(route('public.testimonials.submit', ['token' => $token]))
+            ->assertOk()
+            ->assertSee('Este QR ya no está disponible')
+            ->assertSee('Volver a '.config('brand.name'));
+    }
+
+    public function test_unknown_invitation_also_uses_the_safe_public_state(): void
+    {
+        $this->get(route('public.testimonials.submit', ['token' => str_repeat('x', 64)]))
+            ->assertOk()
+            ->assertSee('solicita otro QR');
     }
 
     public function test_customer_submission_is_private_pending_and_notifies_admin(): void

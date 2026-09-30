@@ -36,14 +36,21 @@ class SubmitTestimonial extends Component
 
     public bool $submitted = false;
 
+    public bool $invitationUnavailable = false;
+
     public function mount(string $token): void
     {
         $this->token = $token;
-        abort_unless($this->invitation()?->isUsable(), 404);
+        $this->invitationUnavailable = ! $this->invitation()?->isUsable();
     }
 
     public function submit(): void
     {
+        if ($this->invitationUnavailable || ! $this->invitation()?->isUsable()) {
+            $this->invitationUnavailable = true;
+
+            return;
+        }
         if ($this->website !== '') {
             $this->submitted = true;
 

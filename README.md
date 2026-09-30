@@ -83,6 +83,8 @@ El administrador puede crear desde la configuración de la landing invitaciones 
 
 Las reseñas recibidas quedan pendientes hasta que un administrador las aprueba. El correo nunca se publica, la foto es opcional y la autorización para recibir novedades se solicita separadamente del consentimiento necesario para gestionar la reseña. Las fotos se guardan en `storage/app/public/testimonials`, por lo que también requieren `php artisan storage:link`.
 
+La impresión de invitaciones contiene únicamente el QR. Los enlaces revocados, caducados o agotados muestran una salida pública amable hacia la portada. Productos, categorías y marcas se sincronizan con la carta mediante Reverb y disponen de un sondeo de recuperación cada 30 segundos.
+
 ## Arquitectura
 
 Se usa un monolito modular. Los módulos comparten autenticación, permisos, auditoría, colas y eventos, pero las reglas del dominio se mantienen separadas. El stock se modifica exclusivamente mediante movimientos transaccionales y nunca editando el saldo sin historial.

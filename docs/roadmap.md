@@ -61,8 +61,10 @@
 - [x] Fotografías y carrusel de productos destacables desde su ficha.
 - [x] Testimonios manuales y sección de empleo opcional.
 - [x] Invitaciones QR temporales, formulario público y moderación de reseñas.
+- [x] Impresión aislada del QR y experiencia pública para enlaces revocados o caducados.
 - [x] Solicitud pública de reserva con asignación automática.
 - [x] Carta o catálogo completo por categorías, con búsqueda y filtros.
+- [x] Sincronización pública en tiempo real de productos, categorías, marcas y destacados.
 - [x] Política de privacidad y aviso legal editables.
 
 ## Después

@@ -181,6 +181,9 @@ document.addEventListener('livewire:init', () => {
         });
         Livewire.dispatch('landing-updated', event);
     });
+    window.Echo.channel('catalog').listen('.catalog.updated', (event) => {
+        Livewire.dispatch('catalog-updated', event);
+    });
 
     if (!document.querySelector('meta[name="app-authenticated"]')) return;
 

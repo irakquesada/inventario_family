@@ -112,6 +112,10 @@ La landing no expone nombres internos de mesas o recursos. `CreatePublicReservat
 
 La carta pública consulta exclusivamente productos activos con `is_sellable`, admite búsqueda y filtrado por categorías y subcategorías, y nunca utiliza el saldo de inventario como criterio de publicación. Esto evita exponer cantidades internas y permite reutilizar el mismo catálogo para futuros canales de venta.
 
+Los cambios de producto, categoría o marca emiten `CatalogUpdated` después del commit mediante un observador dedicado. El catálogo público y los productos destacados de la landing vuelven a consultar sus datos al recibir el evento público de Reverb; la carta conserva además un sondeo ligero cada 30 segundos como recuperación cuando el WebSocket no está disponible. La caída del canal se registra, pero nunca impide guardar el catálogo.
+
+Las invitaciones de reseña revocadas, caducadas, agotadas o inexistentes no exponen un error 404 técnico: conservan el diseño público, explican que el QR ya no está disponible y ofrecen regreso a la portada. La hoja de impresión del panel oculta el resto de la interfaz y coloca únicamente el SVG del QR en una página limpia.
+
 ## Personal y asistencia
 
 `employees` separa la ficha laboral de la cuenta de acceso, aunque toda cuenta creada desde administración genera y sincroniza automáticamente su ficha básica. Los puestos se normalizan en `job_positions` y nunca se capturan como texto libre. `employee_work_periods` define un horario semanal distinto por empleado: admite varios tramos por día, días sin tramos como descanso y turnos que cruzan medianoche. La configuración completa se sustituye en una transacción y rechaza solapamientos incluso entre el domingo y el lunes siguiente.

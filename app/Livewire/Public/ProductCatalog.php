@@ -4,6 +4,7 @@ namespace App\Livewire\Public;
 
 use App\Models\Category;
 use App\Models\Product;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -17,6 +18,12 @@ class ProductCatalog extends Component
 
     #[Url(as: 'categoria')]
     public string $category = '';
+
+    #[On('catalog-updated')]
+    public function refreshCatalog(): void
+    {
+        // Receiving the event or fallback poll re-runs the catalog query.
+    }
 
     public function updatedSearch(): void
     {

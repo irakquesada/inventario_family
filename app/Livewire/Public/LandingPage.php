@@ -50,6 +50,12 @@ class LandingPage extends Component
         // Receiving the event causes Livewire to render the latest public content.
     }
 
+    #[On('catalog-updated')]
+    public function refreshCatalog(): void
+    {
+        // Product cards and the carousel are queried again after catalog changes.
+    }
+
     public function reserve(CreatePublicReservation $creator): void
     {
         $settings = SiteSetting::query()->first();

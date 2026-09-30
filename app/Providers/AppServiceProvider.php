@@ -31,6 +31,7 @@ use App\Models\TimeEntry;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Observers\AuditObserver;
+use App\Observers\CatalogObserver;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Event;
@@ -62,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
             AbsenceType::class, AbsenceRequest::class, EmployeeAbsenceBalance::class,
         ] as $model) {
             $model::observe(AuditObserver::class);
+        }
+
+        foreach ([Product::class, Category::class, Brand::class] as $model) {
+            $model::observe(CatalogObserver::class);
         }
 
         Event::listen(Login::class, function (Login $event): void {
