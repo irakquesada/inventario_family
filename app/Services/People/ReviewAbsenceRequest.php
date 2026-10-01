@@ -11,9 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class ReviewAbsenceRequest
 {
-    public function handle(AbsenceRequest $request, User $reviewer, string $decision, ?string $comment): AbsenceRequest
+    public function handle(AbsenceRequest $request, User $reviewer, string $decision, ?string $comment, bool $allowAdvance = false): AbsenceRequest
     {
-        return DB::transaction(function () use ($request, $reviewer, $decision, $comment): AbsenceRequest {
+        return DB::transaction(function () use ($request, $reviewer, $decision, $comment, $allowAdvance): AbsenceRequest {
             $request = AbsenceRequest::query()->with(['type', 'employee.user'])->lockForUpdate()->findOrFail($request->id);
             if ($request->status !== 'pending') {
                 throw ValidationException::withMessages(['review' => 'Solo se pueden revisar solicitudes pendientes.']);
@@ -23,11 +23,18 @@ class ReviewAbsenceRequest
                 $balance = EmployeeAbsenceBalance::query()->where('employee_id', $request->employee_id)->where('year', $year)->lockForUpdate()->first();
                 $entitled = (float) ($balance?->entitled_days ?? 0);
                 $used = (float) AbsenceRequest::query()->where('employee_id', $request->employee_id)->where('status', 'approved')->whereYear('starts_on', $year)->whereHas('type', fn ($query) => $query->where('deducts_balance', true))->sum('requested_days');
-                if ($used + (float) $request->requested_days > $entitled) {
+                $shortfall = max(0, round($used + (float) $request->requested_days - $entitled, 2));
+                if ($shortfall > 0 && ! $allowAdvance) {
                     throw ValidationException::withMessages(['review' => 'La solicitud supera el saldo disponible del empleado.']);
                 }
+            } else {
+                $shortfall = 0;
             }
-            $request->update(['status' => $decision, 'reviewed_by' => $reviewer->id, 'reviewed_at' => now(), 'review_comment' => $comment]);
+            $request->update([
+                'status' => $decision, 'reviewed_by' => $reviewer->id, 'reviewed_at' => now(), 'review_comment' => $comment,
+                'approved_in_advance' => $decision === 'approved' && $allowAdvance && $shortfall > 0,
+                'balance_shortfall_days' => $decision === 'approved' ? $shortfall : 0,
+            ]);
             if ($request->employee->user) {
                 $request->employee->user->notify(new AbsenceRequestNotification($request, $decision));
             }

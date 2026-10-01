@@ -5,6 +5,7 @@ namespace Tests\Feature\Reservations;
 use App\Livewire\Reservations\ReservationsIndex;
 use App\Models\BusinessClosure;
 use App\Models\BusinessHour;
+use App\Models\Reservation;
 use App\Models\ReservationResource;
 use App\Models\User;
 use App\Services\Reservations\CreateReservation;
@@ -100,6 +101,29 @@ class ReservationTest extends TestCase
 
         Livewire::actingAs($staff)->test(ReservationsIndex::class)->assertOk();
         $this->actingAs($staff)->get(route('reservations.settings'))->assertForbidden();
+    }
+
+    public function test_reservation_screen_shows_calendar_statistics_and_filtered_history(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $staff = User::factory()->create();
+        $staff->assignRole('staff');
+        Reservation::query()->create([
+            'reference' => 'RES-SEP', 'reservation_resource_id' => $this->resource->id,
+            'customer_name' => 'Cliente septiembre', 'customer_phone' => '600000001', 'party_size' => 4,
+            'starts_at' => '2026-09-14 19:00:00', 'ends_at' => '2026-09-14 20:30:00', 'status' => 'completed',
+        ]);
+        Reservation::query()->create([
+            'reference' => 'RES-AUG', 'reservation_resource_id' => $this->resource->id,
+            'customer_name' => 'Cliente agosto', 'customer_phone' => '600000002', 'party_size' => 2,
+            'starts_at' => '2026-08-17 19:00:00', 'ends_at' => '2026-08-17 20:30:00', 'status' => 'cancelled',
+        ]);
+
+        Livewire::actingAs($staff)->test(ReservationsIndex::class)
+            ->set('calendarMonth', '2026-09')->set('date', '2026-09-14')
+            ->set('historyFrom', '2026-09-01')->set('historyTo', '2026-09-30')
+            ->assertSee('Cliente septiembre')->assertDontSee('Cliente agosto')
+            ->assertSee('Anterior: 1')->assertSee('Histórico de reservas');
     }
 
     private function data(string $date, string $time, int $duration): array

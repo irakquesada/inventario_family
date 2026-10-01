@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AbsenceRequest extends Model
 {
-    protected $fillable = ['employee_id', 'absence_type_id', 'starts_on', 'ends_on', 'starts_at', 'ends_at', 'is_full_day', 'requested_days', 'status', 'reason', 'attachment_path', 'attachment_name', 'reviewed_by', 'reviewed_at', 'review_comment', 'cancelled_at'];
+    protected $fillable = ['employee_id', 'absence_type_id', 'starts_on', 'ends_on', 'starts_at', 'ends_at', 'is_full_day', 'requested_days', 'status', 'reason', 'attachment_path', 'attachment_name', 'reviewed_by', 'reviewed_at', 'review_comment', 'approved_in_advance', 'balance_shortfall_days', 'cancelled_at'];
 
     protected function casts(): array
     {
-        return ['starts_on' => 'date', 'ends_on' => 'date', 'is_full_day' => 'boolean', 'requested_days' => 'decimal:2', 'reviewed_at' => 'datetime', 'cancelled_at' => 'datetime'];
+        return ['starts_on' => 'date', 'ends_on' => 'date', 'is_full_day' => 'boolean', 'requested_days' => 'decimal:2', 'reviewed_at' => 'datetime', 'approved_in_advance' => 'boolean', 'balance_shortfall_days' => 'decimal:2', 'cancelled_at' => 'datetime'];
     }
 
     public function employee(): BelongsTo

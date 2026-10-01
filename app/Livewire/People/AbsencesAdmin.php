@@ -43,6 +43,8 @@ class AbsencesAdmin extends Component
 
     public string $reviewComment = '';
 
+    public bool $flexibleApproval = false;
+
     public string $calendarMonth = '';
 
     public function mount(): void
@@ -99,14 +101,19 @@ class AbsencesAdmin extends Component
         $this->reviewingId = $id;
         $this->decision = $decision;
         $this->reviewComment = '';
+        $this->flexibleApproval = false;
     }
 
     public function review(ReviewAbsenceRequest $reviewer): void
     {
         $this->authorizeManagement();
-        $data = $this->validate(['reviewingId' => ['required', 'exists:absence_requests,id'], 'decision' => ['required', Rule::in(['approved', 'rejected'])], 'reviewComment' => ['nullable', 'string', 'max:1000']]);
-        $reviewer->handle(AbsenceRequest::query()->findOrFail($data['reviewingId']), auth()->user(), $data['decision'], $data['reviewComment'] ?: null);
-        $this->reset(['reviewingId', 'reviewComment']);
+        $data = $this->validate([
+            'reviewingId' => ['required', 'exists:absence_requests,id'], 'decision' => ['required', Rule::in(['approved', 'rejected'])],
+            'reviewComment' => [Rule::requiredIf($this->decision === 'approved' && $this->flexibleApproval), 'nullable', 'string', 'max:1000'],
+            'flexibleApproval' => ['boolean'],
+        ]);
+        $reviewer->handle(AbsenceRequest::query()->findOrFail($data['reviewingId']), auth()->user(), $data['decision'], $data['reviewComment'] ?: null, $data['flexibleApproval']);
+        $this->reset(['reviewingId', 'reviewComment', 'flexibleApproval']);
         session()->flash('status', 'Solicitud revisada correctamente.');
     }
 
@@ -129,9 +136,23 @@ class AbsencesAdmin extends Component
             ];
         });
 
+        $balances = EmployeeAbsenceBalance::query()->whereIn('employee_id', $requests->pluck('employee_id'))->get()->keyBy(fn ($balance) => $balance->employee_id.'-'.$balance->year);
+        $usedByEmployeeYear = AbsenceRequest::query()->where('status', 'approved')->whereHas('type', fn ($query) => $query->where('deducts_balance', true))->get()
+            ->groupBy(fn ($request) => $request->employee_id.'-'.$request->starts_on->year)->map->sum('requested_days');
+        $balanceFor = function (AbsenceRequest $request) use ($balances, $usedByEmployeeYear): array {
+            $key = $request->employee_id.'-'.$request->starts_on->year;
+            $entitled = (float) ($balances->get($key)?->entitled_days ?? 0);
+            $used = (float) ($usedByEmployeeYear->get($key) ?? 0);
+
+            return ['entitled' => $entitled, 'used' => $used, 'available' => round($entitled - $used, 2)];
+        };
+        $reviewingRequest = $this->reviewingId ? $requests->firstWhere('id', $this->reviewingId) ?? AbsenceRequest::query()->with(['employee', 'type'])->find($this->reviewingId) : null;
+
         return view('livewire.people.absences-admin', [
             'requests' => $requests, 'employees' => Employee::query()->orderBy('name')->get(),
             'types' => AbsenceType::query()->orderBy('name')->get(), 'calendarDays' => $calendarDays, 'month' => $month,
+            'balanceFor' => $balanceFor, 'reviewingRequest' => $reviewingRequest,
+            'reviewingBalance' => $reviewingRequest ? $balanceFor($reviewingRequest) : null,
         ])->layout('layouts.app', ['title' => 'Ausencias y vacaciones']);
     }
 

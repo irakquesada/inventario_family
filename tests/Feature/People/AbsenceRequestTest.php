@@ -84,4 +84,31 @@ class AbsenceRequestTest extends TestCase
         $staff->assignRole('staff');
         $this->actingAs($staff)->get(route('people.absences.admin'))->assertForbidden();
     }
+
+    public function test_admin_can_explicitly_approve_vacation_in_advance_and_future_balance_offsets_it(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $employee = Employee::query()->create(['employee_number' => 'EMP-302', 'name' => 'Nuria', 'is_active' => true]);
+        EmployeeAbsenceBalance::query()->create(['employee_id' => $employee->id, 'year' => 2026, 'entitled_days' => 8]);
+        $vacation = AbsenceType::query()->where('code', 'VACACIONES')->firstOrFail();
+        $request = AbsenceRequest::query()->create([
+            'employee_id' => $employee->id, 'absence_type_id' => $vacation->id,
+            'starts_on' => '2026-10-01', 'ends_on' => '2026-10-15',
+            'requested_days' => 15, 'status' => 'pending', 'reason' => 'Viaje familiar',
+        ]);
+
+        Livewire::actingAs($admin)->test(AbsencesAdmin::class)
+            ->call('openReview', $request->id, 'approved')
+            ->set('flexibleApproval', true)->set('reviewComment', 'Siete días anticipados')
+            ->call('review')->assertHasNoErrors();
+
+        $request->refresh();
+        $this->assertTrue($request->approved_in_advance);
+        $this->assertSame('7.00', $request->balance_shortfall_days);
+        EmployeeAbsenceBalance::query()->where('employee_id', $employee->id)->update(['entitled_days' => 15]);
+        Livewire::actingAs($admin)->test(AbsencesAdmin::class)
+            ->set('status', 'approved')->assertSee('Disponible 0,00');
+    }
 }

@@ -67,4 +67,22 @@ class TimeClockTest extends TestCase
         $this->assertSame('2026-08-27 17:15:00', $entry->clocked_out_at->format('Y-m-d H:i:s'));
         $this->assertSame($user->id, $entry->recorded_by);
     }
+
+    public function test_employee_can_filter_and_print_only_their_own_time_entries(): void
+    {
+        Carbon::setTestNow('2026-09-30 12:00:00');
+        $this->seed(DatabaseSeeder::class);
+        $user = User::factory()->create();
+        $user->assignRole('staff');
+        $employee = Employee::query()->create([
+            'user_id' => $user->id, 'employee_number' => 'EMP-003', 'name' => 'Sara Fichajes', 'is_active' => true,
+        ]);
+        $employee->timeEntries()->create(['clocked_in_at' => '2026-09-10 09:00:00', 'clocked_out_at' => '2026-09-10 17:00:00']);
+        $employee->timeEntries()->create(['clocked_in_at' => '2026-08-10 10:00:00', 'clocked_out_at' => '2026-08-10 12:00:00']);
+
+        Livewire::actingAs($user)->test(TimeClock::class)
+            ->set('entriesFrom', '2026-09-01')->set('entriesTo', '2026-09-30')
+            ->assertSee('10/09/2026')->assertDontSee('10/08/2026')
+            ->assertSee('8 h')->assertSee('Imprimir fichajes');
+    }
 }
