@@ -41,7 +41,13 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // Keep uploaded media on the browser's current origin. This prevents a
+            // cached local APP_URL from leaking localhost URLs into production and
+            // still supports installations mounted below a URL prefix.
+            'url' => env(
+                'PUBLIC_STORAGE_URL',
+                rtrim((string) (parse_url(env('APP_URL', 'http://localhost'), PHP_URL_PATH) ?: ''), '/').'/storage',
+            ),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

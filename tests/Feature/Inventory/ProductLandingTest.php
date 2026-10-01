@@ -17,6 +17,12 @@ class ProductLandingTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_public_storage_urls_do_not_expose_the_configured_application_host(): void
+    {
+        $this->assertSame('/storage', config('filesystems.disks.public.url'));
+        $this->assertSame('/storage/products/example.jpg', Storage::disk('public')->url('products/example.jpg'));
+    }
+
     public function test_product_can_be_featured_with_image_without_being_sellable(): void
     {
         Storage::fake('public');
@@ -82,5 +88,23 @@ class ProductLandingTest extends TestCase
             ->assertSee('data-product-image-dialog', false)
             ->assertSee('data-image-zoom-in', false)
             ->assertSee('object-contain', false);
+    }
+
+    public function test_existing_product_image_uses_a_current_origin_url_in_the_edit_form(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('products/editable.jpg', 'image-content');
+        $this->seed(DatabaseSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $product = Product::query()->create([
+            'name' => 'Producto editable', 'slug' => 'producto-editable', 'sku' => 'EDITABLE',
+            'is_active' => true, 'is_sellable' => true, 'landing_image_path' => 'products/editable.jpg',
+        ]);
+
+        Livewire::actingAs($admin)->test(ProductsIndex::class)
+            ->call('edit', $product->id)
+            ->assertSeeHtml('src="/storage/products/editable.jpg"')
+            ->assertDontSeeHtml('src="http://localhost');
     }
 }
