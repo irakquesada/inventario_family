@@ -52,4 +52,35 @@ class ProductLandingTest extends TestCase
         SiteSetting::query()->firstOrFail()->update(['carousel_enabled' => false]);
         $this->get(route('home'))->assertOk()->assertDontSee('data-product-carousel', false)->assertSee('Tarta');
     }
+
+    public function test_catalog_replaces_a_missing_product_image_with_a_safe_fallback(): void
+    {
+        Storage::fake('public');
+        Product::query()->create([
+            'name' => 'Producto sin foto', 'slug' => 'producto-sin-foto', 'sku' => 'SIN-FOTO',
+            'is_active' => true, 'is_sellable' => true, 'landing_image_path' => 'products/no-existe.webp',
+        ]);
+
+        $this->get(route('public.products'))
+            ->assertOk()
+            ->assertSee('Imagen no disponible')
+            ->assertDontSee('data-product-image-open', false);
+    }
+
+    public function test_catalog_image_opens_the_shared_zoom_dialog(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('products/con-foto.webp', 'image-content');
+        Product::query()->create([
+            'name' => 'Producto con foto', 'slug' => 'producto-con-foto', 'sku' => 'CON-FOTO',
+            'is_active' => true, 'is_sellable' => true, 'landing_image_path' => 'products/con-foto.webp',
+        ]);
+
+        $this->get(route('public.products'))
+            ->assertOk()
+            ->assertSee('data-product-image-open', false)
+            ->assertSee('data-product-image-dialog', false)
+            ->assertSee('data-image-zoom-in', false)
+            ->assertSee('object-contain', false);
+    }
 }

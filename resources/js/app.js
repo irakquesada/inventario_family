@@ -17,6 +17,22 @@ document.addEventListener('click', (event) => {
     button.setAttribute('aria-pressed', String(reveal));
 });
 
+// Desktop navigation behaves like a single menu bar. Mobile accordions are intentionally excluded.
+document.addEventListener('toggle', (event) => {
+    const opened = event.target;
+    if (!opened.matches?.('[data-desktop-nav] details') || !opened.open) return;
+    opened.closest('[data-desktop-nav]').querySelectorAll('details[open]').forEach((details) => {
+        if (details !== opened) details.removeAttribute('open');
+    });
+}, true);
+
+document.addEventListener('click', (event) => {
+    const desktopNavigation = document.querySelector('[data-desktop-nav]');
+    if (desktopNavigation && !desktopNavigation.contains(event.target)) {
+        desktopNavigation.querySelectorAll('details[open]').forEach((details) => details.removeAttribute('open'));
+    }
+});
+
 document.addEventListener('click', (event) => {
     const opener = event.target.closest('[data-dialog-open]');
     const closer = event.target.closest('[data-dialog-close]');
@@ -32,6 +48,50 @@ document.addEventListener('click', (event) => {
 document.addEventListener('click', (event) => {
     if (event.target.matches?.('dialog[data-dismiss-backdrop]')) event.target.close();
 });
+
+document.addEventListener('error', (event) => {
+    if (!event.target.matches?.('[data-catalog-image]')) return;
+    event.target.classList.add('hidden');
+    const opener = event.target.closest('[data-product-image-open]');
+    opener?.querySelector('[data-image-fallback]')?.classList.remove('hidden');
+    opener?.querySelector('[data-image-fallback]')?.classList.add('flex');
+    if (opener) opener.dataset.imageUnavailable = 'true';
+}, true);
+
+let productImageZoom = 1;
+function updateProductImageZoom(dialog, nextZoom) {
+    productImageZoom = Math.min(3, Math.max(1, nextZoom));
+    const preview = dialog?.querySelector('[data-product-image-preview]');
+    if (preview) preview.style.transform = `scale(${productImageZoom})`;
+    const reset = dialog?.querySelector('[data-image-zoom-reset]');
+    if (reset) reset.textContent = `${Math.round(productImageZoom * 100)}%`;
+}
+
+document.addEventListener('click', (event) => {
+    const opener = event.target.closest('[data-product-image-open]');
+    const dialog = document.querySelector('[data-product-image-dialog]');
+    if (opener && opener.dataset.imageUnavailable !== 'true' && dialog) {
+        dialog.querySelector('[data-product-image-preview]').src = opener.dataset.imageSrc;
+        dialog.querySelector('[data-product-image-preview]').alt = opener.dataset.imageAlt;
+        dialog.querySelector('[data-product-image-title]').textContent = opener.dataset.imageAlt;
+        updateProductImageZoom(dialog, 1);
+        dialog.showModal();
+        document.body.classList.add('overflow-hidden');
+        return;
+    }
+    if (!dialog?.open) return;
+    if (event.target.closest('[data-product-image-close]')) dialog.close();
+    if (event.target.closest('[data-image-zoom-in]')) updateProductImageZoom(dialog, productImageZoom + 0.25);
+    if (event.target.closest('[data-image-zoom-out]')) updateProductImageZoom(dialog, productImageZoom - 0.25);
+    if (event.target.closest('[data-image-zoom-reset]')) updateProductImageZoom(dialog, 1);
+});
+
+document.addEventListener('close', (event) => {
+    if (!event.target.matches?.('[data-product-image-dialog]')) return;
+    document.body.classList.remove('overflow-hidden');
+    const preview = event.target.querySelector('[data-product-image-preview]');
+    if (preview) preview.removeAttribute('src');
+}, true);
 
 const themes = ['system', 'light', 'dark'];
 

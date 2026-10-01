@@ -53,6 +53,34 @@ class LayoutResponsiveTest extends TestCase
             ->assertSee('Notificaciones, 1 pendientes', false);
     }
 
+    public function test_desktop_inventory_navigation_contains_every_available_tool(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $html = $this->actingAs($admin)->get(route('dashboard'))->assertOk()->getContent();
+        $desktopNavigation = Str::between($html, '<nav data-desktop-nav', '<button type="button" data-app-menu-open');
+
+        foreach ([
+            'inventory.products.index', 'inventory.categories.index', 'inventory.brands.index',
+            'inventory.warehouses.index', 'inventory.movements.index', 'inventory.transfers.index',
+            'inventory.labels.index', 'inventory.counts.index', 'inventory.suppliers.index',
+            'inventory.purchase-orders.index', 'inventory.lots.index',
+        ] as $routeName) {
+            $this->assertStringContainsString(route($routeName), $desktopNavigation, "Falta {$routeName} en la navegación de escritorio.");
+        }
+    }
+
+    public function test_desktop_dropdowns_have_exclusive_opening_behavior(): void
+    {
+        $javascript = file_get_contents(resource_path('js/app.js'));
+
+        $this->assertStringContainsString('[data-desktop-nav]', $javascript);
+        $this->assertStringContainsString('details[open]', $javascript);
+        $this->assertStringContainsString("details.removeAttribute('open')", $javascript);
+    }
+
     public function test_public_layout_has_a_mobile_menu_and_hides_reservations_when_disabled(): void
     {
         SiteSetting::query()->firstOrFail()->update(['reservations_enabled' => false]);
