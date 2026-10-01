@@ -19,33 +19,17 @@
 </head>
 <body class="min-h-screen bg-stone-50 text-stone-900">
     @php($moduleManager = app(App\Support\ModuleManager::class))
+    @php($unreadNotificationCount = auth()->user()->unreadNotifications()->count())
     <header class="border-b border-stone-200 bg-white print:hidden">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <a href="{{ route('dashboard') }}" class="text-lg font-bold">{{ config('brand.name') }}</a>
-            <nav class="hidden items-center gap-3 text-sm font-medium md:flex">
-                @if($moduleManager->enabled('inventory')) @can('inventory.view')
-                    <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('inventory.products.index') }}">Inventario</a>
-                @endcan @endif
-                @if($moduleManager->enabled('reservations')) @can('reservations.view')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('reservations.index') }}">Reservas</a>@endcan @endif
-                @if($moduleManager->enabled('sales')) @can('sales.view')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('sales.index') }}">Ventas</a>@endcan @endif
-                @can('audit.view')
-                    <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.access-logs.index') }}">Accesos</a>
-                    <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.activity-logs.index') }}">Auditoría</a>
-                    <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.analytics.index') }}">Analítica</a>
-                @endcan
-                @can('users.manage')
-                    <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.users.index') }}">Usuarios</a>
-                @endcan
-                @if($moduleManager->enabled('landing')) @can('content.manage')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.landing.settings') }}">Landing</a>@endcan @endif
-                @if($moduleManager->enabled('people'))
-                    @can('people.view')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('people.employees.index') }}">Personal</a>@endcan
-                    @can('people.manage')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('people.attendance.index') }}">Asistencia</a>@endcan
-                    @can('people.manage')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('people.absences.admin') }}">Ausencias</a>@endcan
-                    @can('people.clock')@if(auth()->user()->employee)<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('people.clock') }}">Fichar</a>@endif @endcan
-                    @can('people.clock')@if(auth()->user()->employee)<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('people.absences.mine') }}">Mis ausencias</a>@endif @endcan
-                @endif
-                @if(auth()->user()->hasRole('admin') && mb_strtolower(auth()->user()->email) === mb_strtolower(config('platform.owner_email')))<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.platform.modules') }}">Plataforma</a>@endif
-                <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('notifications.index') }}">Notificaciones @if(auth()->user()->unreadNotifications()->exists())<span class="ml-1 inline-block size-2 rounded-full bg-red-600" aria-label="Hay notificaciones pendientes"></span>@endif</a>
+            <nav class="hidden items-center gap-1 text-sm font-medium md:flex">
+                <a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('dashboard') }}">Panel</a>
+                @if($moduleManager->enabled('inventory')) @can('inventory.view')<details class="group relative"><summary class="cursor-pointer list-none rounded-lg px-3 py-2 hover:bg-stone-100">Inventario ▾</summary><div class="absolute left-0 z-50 mt-2 grid w-64 gap-1 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl"><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('inventory.products.index') }}">Productos</a><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('inventory.movements.index') }}">Movimientos</a><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('inventory.warehouses.index') }}">Almacenes</a><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('inventory.lots.index') }}">Lotes y caducidad</a>@can('inventory.manage')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('inventory.suppliers.index') }}">Proveedores y compras</a><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('inventory.labels.index') }}">Etiquetas</a>@endcan<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('inventory.categories.index') }}">Categorías y marcas</a></div></details>@endcan @endif
+                <details class="group relative"><summary class="cursor-pointer list-none rounded-lg px-3 py-2 hover:bg-stone-100">Operaciones ▾</summary><div class="absolute left-0 z-50 mt-2 grid w-60 gap-1 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl">@if($moduleManager->enabled('reservations')) @can('reservations.view')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('reservations.index') }}">Reservas</a>@endcan @endif @if($moduleManager->enabled('sales')) @can('sales.view')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('sales.index') }}">Ventas</a>@endcan @endif @if($moduleManager->enabled('landing')) @can('content.manage')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.landing.settings') }}">Landing pública</a>@endcan @endif</div></details>
+                @if($moduleManager->enabled('people') || $moduleManager->enabled('payroll'))<details class="group relative"><summary class="cursor-pointer list-none rounded-lg px-3 py-2 hover:bg-stone-100">Equipo ▾</summary><div class="absolute left-0 z-50 mt-2 grid w-64 gap-1 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl">@if($moduleManager->enabled('people')) @can('people.view')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('people.employees.index') }}">Personal y horarios</a>@endcan @can('people.manage')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('people.attendance.index') }}">Asistencia</a><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('people.absences.admin') }}">Ausencias</a>@endcan @endif @if($moduleManager->enabled('payroll')) @can('payroll.manage')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('payroll.contracts.index') }}">Contratos</a><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('payroll.runs.index') }}">Nóminas</a>@endcan @can('payroll.self')@if(auth()->user()->employee)<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('payroll.mine') }}">Mis documentos</a>@endif @endcan @endif @can('people.clock')@if(auth()->user()->employee)<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('people.clock') }}">Mi fichaje</a><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('people.absences.mine') }}">Mis ausencias</a>@endif @endcan</div></details>@endif
+                @can('audit.view')<details class="group relative"><summary class="cursor-pointer list-none rounded-lg px-3 py-2 hover:bg-stone-100">Administración ▾</summary><div class="absolute right-0 z-50 mt-2 grid w-64 gap-1 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl"><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.access-logs.index') }}">Accesos</a><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.activity-logs.index') }}">Auditoría</a><a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.analytics.index') }}">Analítica</a>@can('users.manage')<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.users.index') }}">Usuarios</a>@endcan @if(auth()->user()->hasRole('admin') && mb_strtolower(auth()->user()->email) === mb_strtolower(config('platform.owner_email')))<a class="rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('admin.platform.modules') }}">Plataforma</a>@endif</div></details>@endcan
+                <a class="relative rounded-lg px-3 py-2 hover:bg-stone-100" href="{{ route('notifications.index') }}" aria-label="Notificaciones, {{ $unreadNotificationCount }} pendientes">Notificaciones @if($unreadNotificationCount)<span class="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-bold text-white">{{ $unreadNotificationCount>99?'99+':$unreadNotificationCount }}</span>@endif</a>
                 <button type="button" data-theme-toggle class="rounded-lg px-3 py-2 hover:bg-stone-100" aria-label="Cambiar tema">Tema</button>
                 <form method="POST" action="{{ route('logout') }}">@csrf
                     <button class="rounded-lg px-3 py-2 hover:bg-stone-100">Salir</button>
@@ -54,49 +38,13 @@
             <button type="button" data-app-menu-open class="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white px-3 py-2 font-semibold md:hidden" aria-label="Abrir menú" aria-haspopup="dialog">☰ <span>Menú</span></button>
         </div>
     </header>
-    @if($moduleManager->enabled('inventory')) @can('inventory.view')
-        <nav class="hidden border-b border-stone-200 bg-stone-100 print:hidden md:block" aria-label="Secciones de inventario">
-            <div class="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 py-2 text-sm sm:px-6">
-                <a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.products.index') }}">Productos</a>
-                <a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.categories.index') }}">Categorías</a>
-                <a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.brands.index') }}">Marcas</a>
-                <a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.warehouses.index') }}">Almacenes</a>
-                <a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.movements.index') }}">Movimientos</a>
-                @can('inventory.adjust')<a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.transfers.index') }}">Transferencias</a>@endcan
-                @can('inventory.manage')<a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.labels.index') }}">Etiquetas</a>@endcan
-                @can('inventory.count')<a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.counts.index') }}">Conteos</a>@endcan
-                @can('inventory.manage')<a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.suppliers.index') }}">Proveedores</a>@endcan
-                @can('inventory.manage')<a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.purchase-orders.index') }}">Compras</a>@endcan
-                <a class="whitespace-nowrap rounded-lg px-3 py-2 hover:bg-white" href="{{ route('inventory.lots.index') }}">Lotes</a>
-            </div>
-        </nav>
-    @endcan @endif
     <dialog data-app-menu class="m-0 ml-auto h-dvh max-h-none w-[min(88vw,24rem)] max-w-none bg-white p-0 text-stone-900 shadow-2xl backdrop:bg-black/65 print:hidden">
         <div class="flex min-h-full flex-col">
             <div class="flex items-center justify-between border-b border-stone-200 p-4"><strong class="text-lg">{{ config('brand.name') }}</strong><button type="button" data-app-menu-close class="rounded-xl border border-stone-300 px-3 py-2 font-semibold" aria-label="Cerrar menú">✕ Cerrar</button></div>
             <nav class="flex-1 overflow-y-auto p-4" aria-label="Menú principal">
-                <p class="px-3 text-xs font-bold uppercase tracking-wide text-stone-500">General</p>
-                <div class="mt-2 grid gap-1">
-                    <a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('dashboard') }}">Panel</a>
-                    @if($moduleManager->enabled('reservations')) @can('reservations.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('reservations.index') }}">Reservas</a>@endcan @endif
-                    @if($moduleManager->enabled('sales')) @can('sales.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('sales.index') }}">Ventas</a>@endcan @endif
-                    @can('audit.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.access-logs.index') }}">Registro de accesos</a>@endcan
-                    @can('audit.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.activity-logs.index') }}">Auditoría de operaciones</a><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.analytics.index') }}">Analítica pública</a>@endcan
-                    @can('users.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.users.index') }}">Usuarios</a>@endcan
-                    @if($moduleManager->enabled('landing')) @can('content.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.landing.settings') }}">Landing pública</a>@endcan @endif
-                    @if($moduleManager->enabled('people'))
-                        @can('people.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('people.employees.index') }}">Personal</a>@endcan
-                        @can('people.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('people.attendance.index') }}">Control de asistencia</a>@endcan
-                        @can('people.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('people.absences.admin') }}">Ausencias y vacaciones</a>@endcan
-                        @can('people.clock')@if(auth()->user()->employee)<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('people.clock') }}">Mi fichaje</a>@endif @endcan
-                        @can('people.clock')@if(auth()->user()->employee)<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('people.absences.mine') }}">Mis ausencias</a>@endif @endcan
-                    @endif
-                    @if(auth()->user()->hasRole('admin') && mb_strtolower(auth()->user()->email) === mb_strtolower(config('platform.owner_email')))<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.platform.modules') }}">Configuración de plataforma</a>@endif
-                    <a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('notifications.index') }}">Notificaciones @if(auth()->user()->unreadNotifications()->exists())<span class="ml-1 rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-800">Pendientes</span>@endif</a>
-                </div>
+                <div class="grid gap-2"><a class="rounded-xl bg-stone-100 px-4 py-3 font-bold" href="{{ route('dashboard') }}">Panel</a><a class="flex items-center justify-between rounded-xl px-4 py-3 font-bold hover:bg-stone-100" href="{{ route('notifications.index') }}"><span>Notificaciones</span>@if($unreadNotificationCount)<span class="rounded-full bg-red-600 px-2 py-0.5 text-xs text-white">{{ $unreadNotificationCount>99?'99+':$unreadNotificationCount }}</span>@endif</a></div>
                 @if($moduleManager->enabled('inventory')) @can('inventory.view')
-                    <p class="mt-6 px-3 text-xs font-bold uppercase tracking-wide text-stone-500">Inventario</p>
-                    <div class="mt-2 grid gap-1">
+                    <details class="mt-3 rounded-2xl border border-stone-200"><summary class="cursor-pointer list-none px-4 py-3 font-black">Inventario <span class="float-right">⌄</span></summary><div class="grid gap-1 border-t border-stone-100 p-2">
                         <a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('inventory.products.index') }}">Productos</a>
                         <a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('inventory.categories.index') }}">Categorías</a>
                         <a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('inventory.brands.index') }}">Marcas</a>
@@ -108,12 +56,11 @@
                         @can('inventory.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('inventory.suppliers.index') }}">Proveedores</a>@endcan
                         @can('inventory.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('inventory.purchase-orders.index') }}">Órdenes de compra</a>@endcan
                         <a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('inventory.lots.index') }}">Lotes y caducidad</a>
-                    </div>
+                    </div></details>
                 @endcan @endif
-                @if($moduleManager->enabled('sales')) @can('sales.view')
-                    <p class="mt-6 px-3 text-xs font-bold uppercase tracking-wide text-stone-500">Ventas</p>
-                    <div class="mt-2 grid gap-1"><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('sales.index') }}">Historial de ventas</a>@can('sales.create')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('sales.pos') }}">Punto de venta</a>@endcan</div>
-                @endcan @endif
+                <details class="mt-3 rounded-2xl border border-stone-200"><summary class="cursor-pointer list-none px-4 py-3 font-black">Operaciones <span class="float-right">⌄</span></summary><div class="grid gap-1 border-t border-stone-100 p-2">@if($moduleManager->enabled('reservations')) @can('reservations.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('reservations.index') }}">Reservas</a>@endcan @endif @if($moduleManager->enabled('sales')) @can('sales.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('sales.index') }}">Historial de ventas</a>@can('sales.create')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('sales.pos') }}">Punto de venta</a>@endcan @endcan @endif @if($moduleManager->enabled('landing')) @can('content.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.landing.settings') }}">Landing pública</a>@endcan @endif</div></details>
+                @if($moduleManager->enabled('people') || $moduleManager->enabled('payroll'))<details class="mt-3 rounded-2xl border border-stone-200"><summary class="cursor-pointer list-none px-4 py-3 font-black">Equipo <span class="float-right">⌄</span></summary><div class="grid gap-1 border-t border-stone-100 p-2">@if($moduleManager->enabled('people')) @can('people.view')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('people.employees.index') }}">Personal y horarios</a>@endcan @can('people.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('people.attendance.index') }}">Asistencia</a><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('people.absences.admin') }}">Ausencias y vacaciones</a>@endcan @endif @if($moduleManager->enabled('payroll')) @can('payroll.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('payroll.contracts.index') }}">Contratos</a><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('payroll.runs.index') }}">Nóminas</a>@endcan @can('payroll.self')@if(auth()->user()->employee)<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('payroll.mine') }}">Mis documentos laborales</a>@endif @endcan @endif @can('people.clock')@if(auth()->user()->employee)<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('people.clock') }}">Mi fichaje</a><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('people.absences.mine') }}">Mis ausencias</a>@endif @endcan</div></details>@endif
+                @can('audit.view')<details class="mt-3 rounded-2xl border border-stone-200"><summary class="cursor-pointer list-none px-4 py-3 font-black">Administración <span class="float-right">⌄</span></summary><div class="grid gap-1 border-t border-stone-100 p-2"><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.access-logs.index') }}">Registro de accesos</a><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.activity-logs.index') }}">Auditoría</a><a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.analytics.index') }}">Analítica</a>@can('users.manage')<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.users.index') }}">Usuarios</a>@endcan @if(auth()->user()->hasRole('admin') && mb_strtolower(auth()->user()->email) === mb_strtolower(config('platform.owner_email')))<a class="rounded-xl px-3 py-3 font-semibold hover:bg-stone-100" href="{{ route('admin.platform.modules') }}">Configuración de plataforma</a>@endif</div></details>@endcan
             </nav>
             <div class="space-y-2 border-t border-stone-200 p-4">
                 <button type="button" data-theme-toggle class="w-full rounded-xl border border-stone-300 px-4 py-3 text-left font-semibold">Tema</button>

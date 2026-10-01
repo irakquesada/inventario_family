@@ -13,6 +13,7 @@ class ModuleManager
         'reservations' => ['label' => 'Reservas', 'description' => 'Agenda, recursos, horarios, solicitudes públicas y configuración de reservas.'],
         'people' => ['label' => 'Personal y fichaje', 'description' => 'Empleados, puestos, horarios, asistencia, fichaje, ausencias y vacaciones.'],
         'sales' => ['label' => 'Ventas y TPV', 'description' => 'Punto de venta, pedidos, tickets, formas de pago y devolución segura de existencias.'],
+        'payroll' => ['label' => 'Contratos y nóminas', 'description' => 'Expedientes contractuales, documentos privados, periodos de nómina, recibos PDF y autoservicio del empleado.'],
     ];
 
     private ?array $states = null;

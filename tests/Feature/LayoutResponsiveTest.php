@@ -6,6 +6,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class LayoutResponsiveTest extends TestCase
@@ -38,6 +39,18 @@ class LayoutResponsiveTest extends TestCase
         $this->assertStringContainsString('html.dark .bg-red-100', $css);
         $this->assertStringContainsString('html.dark .text-amber-900', $css);
         $this->assertStringContainsString('html.dark .text-blue-900', $css);
+    }
+
+    public function test_navigation_groups_modules_and_shows_numeric_notification_counter(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $admin->notifications()->create(['id' => (string) Str::uuid(), 'type' => 'TestNotification', 'data' => ['title' => 'Pendiente']]);
+
+        $this->actingAs($admin)->get(route('dashboard'))->assertOk()
+            ->assertSee('Inventario ▾')->assertSee('Operaciones ▾')->assertSee('Equipo ▾')->assertSee('Administración ▾')
+            ->assertSee('Notificaciones, 1 pendientes', false);
     }
 
     public function test_public_layout_has_a_mobile_menu_and_hides_reservations_when_disabled(): void

@@ -220,6 +220,16 @@ Tras actualizar el código, reinicia los procesos de larga duración para que ca
 sudo systemctl restart inventario-pro-queue inventario-pro-reverb
 ```
 
+## Contratos, nóminas y datos protegidos
+
+El módulo independiente `payroll` concentra contratos, documentos firmados, periodos de nómina, conceptos, recibos y resúmenes PDF. Puede desactivarse desde **Plataforma** sin borrar información. Los empleados vinculados a una cuenta solo pueden consultar sus propios contratos y recibos publicados; los borradores permanecen restringidos a administración.
+
+Los documentos firmados se guardan en el disco privado `local`. El documento fiscal, número de Seguridad Social, domicilio e IBAN del empleado usan cifrado de Laravel antes de almacenarse. `APP_KEY` debe conservarse y respaldarse de forma segura: cambiarla sin una estrategia de rotación impediría descifrar estos campos.
+
+El sistema automatiza sumas, estados e histórico, pero los porcentajes fiscales, cotizaciones y conceptos dependen de la legislación, convenio y situación individual. Deben ser introducidos o verificados por la persona responsable o asesoría antes de cerrar un periodo. Un periodo cerrado bloquea sus importes; después puede marcarse como pagado.
+
+Antes de generar documentos laborales definitivos, completa en **Plataforma → Identidad de la implantación** la razón social, identificador fiscal, cuenta de cotización y domicilio laboral.
+
 ## Comprobaciones del proyecto
 
 Antes de integrar cambios importantes:

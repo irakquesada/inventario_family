@@ -37,6 +37,9 @@ class DatabaseSeeder extends Seeder
             'sales.create',
             'sales.manage',
             'sales.refund',
+            'payroll.view',
+            'payroll.manage',
+            'payroll.self',
         ])->mapWithKeys(fn (string $name) => [$name => Permission::findOrCreate($name)]);
 
         $admin = Role::findOrCreate('admin');
@@ -45,7 +48,7 @@ class DatabaseSeeder extends Seeder
         $staff = Role::findOrCreate('staff');
         $staff->syncPermissions($permissions->only([
             'inventory.view', 'inventory.manage', 'inventory.adjust', 'inventory.count',
-            'reservations.view', 'reservations.manage', 'people.clock', 'sales.view', 'sales.create',
+            'reservations.view', 'reservations.manage', 'people.clock', 'sales.view', 'sales.create', 'payroll.self',
         ])->values());
 
         foreach ([

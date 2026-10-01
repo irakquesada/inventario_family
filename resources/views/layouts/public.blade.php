@@ -7,8 +7,19 @@
     <meta name="app-public" content="true">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="analytics-endpoint" content="{{ route('public.analytics.store') }}">
-    <title>{{ $title }} · {{ config('brand.name') }}</title>
-    <meta name="description" content="{{ config('brand.name') }}: productos, contacto, horarios y reservas.">
+    @php($seoSettings = App\Models\SiteSetting::query()->first())
+    @php($seoSiteName = $seoSettings?->seo_site_name ?: 'Inventario Pro')
+    @php($seoTitle = request()->routeIs('home') ? ($seoSettings?->seo_title ?: 'Inventario Pro | Gestión, productos y reservas') : ($title.' · '.$seoSiteName))
+    @php($seoDescription = $seoSettings?->seo_description ?: 'Inventario Pro centraliza productos, disponibilidad, reservas y atención al cliente en una experiencia rápida y clara.')
+    @php($seoCanonical = request()->routeIs('home') && $seoSettings?->seo_canonical_url ? rtrim($seoSettings->seo_canonical_url, '/') : url()->current())
+    <title>{{ $seoTitle }}</title>
+    <meta name="description" content="{{ $seoDescription }}">
+    @if($seoSettings?->seo_keywords)<meta name="keywords" content="{{ $seoSettings->seo_keywords }}">@endif
+    <meta name="robots" content="{{ ($seoSettings?->seo_indexing_enabled ?? true) ? 'index,follow' : 'noindex,nofollow' }}">
+    <link rel="canonical" href="{{ $seoCanonical }}">
+    <meta property="og:type" content="website"><meta property="og:site_name" content="{{ $seoSiteName }}"><meta property="og:title" content="{{ $seoTitle }}"><meta property="og:description" content="{{ $seoDescription }}"><meta property="og:url" content="{{ $seoCanonical }}">
+    @if($seoSettings?->seo_og_image)<meta property="og:image" content="{{ $seoSettings->seo_og_image }}"><meta name="twitter:card" content="summary_large_image">@else<meta name="twitter:card" content="summary">@endif
+    @if(request()->routeIs('home'))<script type="application/ld+json">{!! json_encode(['@context'=>'https://schema.org','@type'=>$seoSettings?->seo_business_type ?: 'LocalBusiness','name'=>$seoSiteName,'url'=>$seoCanonical,'description'=>$seoDescription,'telephone'=>$seoSettings?->phone,'email'=>$seoSettings?->email,'address'=>$seoSettings?->address,'sameAs'=>array_values(array_filter([$seoSettings?->instagram_url,$seoSettings?->facebook_url]))], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>@endif
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 <body class="bg-stone-50 text-stone-900">

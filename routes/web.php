@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\AnalyticsExportController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Inventory\ProductCsvController;
+use App\Http\Controllers\Payroll\ContractDocumentController;
+use App\Http\Controllers\Payroll\PayrollPdfController;
 use App\Http\Controllers\People\AbsenceAttachmentController;
 use App\Http\Controllers\People\AttendanceExportController;
 use App\Http\Controllers\People\ScheduleExportController;
@@ -31,6 +33,10 @@ use App\Livewire\Inventory\SuppliersIndex;
 use App\Livewire\Inventory\TransfersIndex;
 use App\Livewire\Inventory\WarehousesIndex;
 use App\Livewire\NotificationsIndex;
+use App\Livewire\Payroll\ContractsIndex;
+use App\Livewire\Payroll\MyDocuments;
+use App\Livewire\Payroll\PayrollRunShow;
+use App\Livewire\Payroll\PayrollRunsIndex;
 use App\Livewire\People\AbsencesAdmin;
 use App\Livewire\People\AttendanceIndex;
 use App\Livewire\People\EmployeeSchedule;
@@ -170,6 +176,16 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/personal/{employee}/horario', EmployeeSchedule::class)->middleware('can:people.manage')->name('people.employees.schedule');
         Route::get('/personal/puestos', JobPositionsIndex::class)->middleware('can:people.manage')->name('people.positions.index');
         Route::get('/mi-fichaje', TimeClock::class)->middleware('can:people.clock')->name('people.clock');
+    });
+    Route::middleware('module:payroll')->group(function (): void {
+        Route::get('/recursos-humanos/contratos', ContractsIndex::class)->middleware('can:payroll.manage')->name('payroll.contracts.index');
+        Route::get('/recursos-humanos/contratos/{contract}/documento', ContractDocumentController::class)->middleware('can:payroll.self')->name('payroll.contracts.document');
+        Route::get('/recursos-humanos/contratos/{contract}/pdf', [PayrollPdfController::class, 'contract'])->middleware('can:payroll.self')->name('payroll.contracts.pdf');
+        Route::get('/recursos-humanos/nominas', PayrollRunsIndex::class)->middleware('can:payroll.manage')->name('payroll.runs.index');
+        Route::get('/recursos-humanos/nominas/{payrollRun}', PayrollRunShow::class)->middleware('can:payroll.manage')->name('payroll.runs.show');
+        Route::get('/recursos-humanos/nominas/{payrollRun}/resumen', [PayrollPdfController::class, 'summary'])->middleware('can:payroll.manage')->name('payroll.runs.summary');
+        Route::get('/recursos-humanos/recibos/{entry}', [PayrollPdfController::class, 'payslip'])->middleware('can:payroll.self')->name('payroll.entries.payslip');
+        Route::get('/mis-documentos-laborales', MyDocuments::class)->middleware('can:payroll.self')->name('payroll.mine');
     });
     Route::post('/cerrar-sesion', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

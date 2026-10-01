@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Employee extends Model
 {
-    protected $fillable = ['user_id', 'job_position_id', 'employee_number', 'name', 'email', 'phone', 'position', 'hired_on', 'is_active', 'notes'];
+    protected $fillable = ['user_id', 'job_position_id', 'employee_number', 'name', 'email', 'phone', 'tax_id', 'social_security_number', 'postal_address', 'iban', 'position', 'hired_on', 'is_active', 'notes'];
 
     protected function casts(): array
     {
-        return ['hired_on' => 'date', 'is_active' => 'boolean'];
+        return ['hired_on' => 'date', 'is_active' => 'boolean', 'tax_id' => 'encrypted', 'social_security_number' => 'encrypted', 'postal_address' => 'encrypted', 'iban' => 'encrypted'];
     }
 
     public function user(): BelongsTo
@@ -43,5 +43,15 @@ class Employee extends Model
     public function absenceBalances(): HasMany
     {
         return $this->hasMany(EmployeeAbsenceBalance::class);
+    }
+
+    public function employmentContracts(): HasMany
+    {
+        return $this->hasMany(EmploymentContract::class);
+    }
+
+    public function payrollEntries(): HasMany
+    {
+        return $this->hasMany(PayrollEntry::class);
     }
 }

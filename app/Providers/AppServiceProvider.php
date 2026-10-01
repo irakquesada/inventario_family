@@ -13,8 +13,12 @@ use App\Models\Category;
 use App\Models\Employee;
 use App\Models\EmployeeAbsenceBalance;
 use App\Models\EmployeeWorkPeriod;
+use App\Models\EmploymentContract;
 use App\Models\InventoryCount;
 use App\Models\JobPosition;
+use App\Models\PayrollEntry;
+use App\Models\PayrollEntryItem;
+use App\Models\PayrollRun;
 use App\Models\Product;
 use App\Models\ProductSupplier;
 use App\Models\PurchaseOrder;
@@ -61,6 +65,7 @@ class AppServiceProvider extends ServiceProvider
             Employee::class, EmployeeWorkPeriod::class, TimeEntry::class,
             JobPosition::class,
             AbsenceType::class, AbsenceRequest::class, EmployeeAbsenceBalance::class,
+            EmploymentContract::class, PayrollRun::class, PayrollEntry::class, PayrollEntryItem::class,
         ] as $model) {
             $model::observe(AuditObserver::class);
         }
