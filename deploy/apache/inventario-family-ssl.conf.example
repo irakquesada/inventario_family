@@ -1,0 +1,27 @@
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+    ServerName inventario-family.floopware.com
+    DocumentRoot /var/www/floopware/inventario_family/public
+
+    <Directory /var/www/floopware/inventario_family/public>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+    </Directory>
+
+    # Reverb permanece privado en 127.0.0.1:8081. Apache publica WSS en 443.
+    ProxyPass        /app  ws://127.0.0.1:8081/app
+    ProxyPassReverse /app  ws://127.0.0.1:8081/app
+    ProxyPass        /apps http://127.0.0.1:8081/apps
+    ProxyPassReverse /apps http://127.0.0.1:8081/apps
+
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/inventario-family.floopware.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/inventario-family.floopware.com/privkey.pem
+    Include /etc/letsencrypt/options-ssl-apache.conf
+
+    ErrorLog ${APACHE_LOG_DIR}/inventario-family-ssl-error.log
+    CustomLog ${APACHE_LOG_DIR}/inventario-family-ssl-access.log combined
+</VirtualHost>
+</IfModule>

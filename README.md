@@ -265,24 +265,49 @@ sudo systemctl enable --now inventario-family-queue inventario-family-reverb
 Variables de producción correspondientes:
 
 ```dotenv
-APP_URL=https://inventario_fam.floopware.com
-ASSET_URL=https://inventario_fam.floopware.com
+APP_URL=https://inventario-family.floopware.com
+ASSET_URL=https://inventario-family.floopware.com
 BROADCAST_CONNECTION=reverb
 QUEUE_CONNECTION=database
 VITE_REALTIME_ENABLED=true
 REVERB_SERVER_HOST=127.0.0.1
 REVERB_SERVER_PORT=8081
-REVERB_HOST=inventario_fam.floopware.com
+REVERB_HOST=inventario-family.floopware.com
 REVERB_PORT=443
 REVERB_SCHEME=https
-REVERB_ALLOWED_ORIGINS=inventario_fam.floopware.com
+REVERB_ALLOWED_ORIGINS=inventario-family.floopware.com
 VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
 VITE_REVERB_HOST="${REVERB_HOST}"
 VITE_REVERB_PORT="${REVERB_PORT}"
 VITE_REVERB_SCHEME="${REVERB_SCHEME}"
 ```
 
-Antes de activarlo, comprueba que `8081` esté libre con `sudo ss -ltnp | grep ':8081'`; la ausencia de salida significa que puede utilizarse. El ejemplo completo de VirtualHost está en `deploy/apache/inventario-family-vhost.conf.example`, y el bloque para integrarlo en un VirtualHost SSL ya existente está en `deploy/apache/inventario-family-reverb-proxy.conf.example`.
+Antes de activarlo, comprueba que `8081` esté libre con `sudo ss -ltnp | grep ':8081'`; la ausencia de salida significa que puede utilizarse. Apache se instala en dos fases: `deploy/apache/inventario-family-http.conf.example` permite emitir el certificado y `deploy/apache/inventario-family-ssl.conf.example` activa HTTPS y WSS. El bloque proxy independiente permanece disponible para integraciones manuales.
+
+Instalación de Apache desde cero:
+
+```bash
+sudo a2enmod rewrite ssl proxy proxy_http proxy_wstunnel headers
+
+sudo cp deploy/apache/inventario-family-http.conf.example \
+  /etc/apache2/sites-available/inventario-family.conf
+sudo a2ensite inventario-family.conf
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+
+sudo certbot certonly --webroot \
+  --webroot-path /var/www/floopware/inventario_family/public \
+  --cert-name inventario-family.floopware.com \
+  -d inventario-family.floopware.com
+
+sudo cp deploy/apache/inventario-family-ssl.conf.example \
+  /etc/apache2/sites-available/inventario-family-ssl.conf
+sudo a2ensite inventario-family-ssl.conf
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+```
+
+Antes de copiar el VirtualHost SSL, confirma que existen `fullchain.pem` y `privkey.pem` en `/etc/letsencrypt/live/inventario-family.floopware.com/`. No dupliques este `ServerName` en otro VirtualHost.
 
 Tras cambiar variables `VITE_*`, siempre recompila y reinicia los procesos:
 
@@ -298,7 +323,7 @@ sudo systemctl restart inventario-family-queue inventario-family-reverb
 La comprobación conjunta puede ejecutarse con:
 
 ```bash
-sudo bash deploy/check-inventario-family.sh inventario_fam.floopware.com
+sudo bash deploy/check-inventario-family.sh inventario-family.floopware.com
 ```
 
 ## Comprobaciones del proyecto

@@ -1,0 +1,19 @@
+<VirtualHost *:80>
+    ServerName inventario-family.floopware.com
+    DocumentRoot /var/www/floopware/inventario_family/public
+
+    <Directory /var/www/floopware/inventario_family/public>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+    </Directory>
+
+    # Permite renovar Let's Encrypt y redirige el resto a HTTPS.
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+    RewriteRule ^ https://inventario-family.floopware.com%{REQUEST_URI} [END,NE,R=permanent]
+
+    ErrorLog ${APACHE_LOG_DIR}/inventario-family-error.log
+    CustomLog ${APACHE_LOG_DIR}/inventario-family-access.log combined
+</VirtualHost>

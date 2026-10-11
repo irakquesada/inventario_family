@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-domain="${1:-inventario_fam.floopware.com}"
+domain="${1:-inventario-family.floopware.com}"
 
 echo "== Servicios =="
 systemctl --no-pager --full status inventario-family-queue inventario-family-reverb
