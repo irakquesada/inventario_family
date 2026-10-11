@@ -1,0 +1,17 @@
+[Unit]
+Description=Inventario Family - Laravel Reverb WebSocket server (port 8081)
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/floopware/inventario_family
+ExecStart=/usr/bin/php artisan reverb:start --host=127.0.0.1 --port=8081 --no-interaction
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

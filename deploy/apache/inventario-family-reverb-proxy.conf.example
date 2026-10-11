@@ -1,0 +1,6 @@
+# Añadir dentro del VirtualHost HTTPS de inventario_fam.floopware.com.
+# Requiere: a2enmod proxy proxy_http proxy_wstunnel
+ProxyPass        /app  ws://127.0.0.1:8081/app
+ProxyPassReverse /app  ws://127.0.0.1:8081/app
+ProxyPass        /apps http://127.0.0.1:8081/apps
+ProxyPassReverse /apps http://127.0.0.1:8081/apps

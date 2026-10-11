@@ -1,0 +1,17 @@
+[Unit]
+Description=Inventario Family - Laravel queue worker
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/floopware/inventario_family
+ExecStart=/usr/bin/php artisan queue:work database --sleep=3 --tries=3 --timeout=90 --max-time=3600 --no-interaction
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=3600
+
+[Install]
+WantedBy=multi-user.target

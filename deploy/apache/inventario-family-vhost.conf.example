@@ -1,0 +1,49 @@
+# Sustituye inventario_fam.floopware.com por inventario-fam.floopware.com si
+# cambias el DNS al formato recomendado para certificados TLS públicos.
+<VirtualHost *:80>
+    ServerName inventario_fam.floopware.com
+    DocumentRoot /var/www/floopware/inventario_family/public
+
+    <Directory /var/www/floopware/inventario_family/public>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/inventario-family-error.log
+    CustomLog ${APACHE_LOG_DIR}/inventario-family-access.log combined
+
+    RewriteEngine On
+    RewriteCond %{SERVER_NAME} =inventario_fam.floopware.com
+    RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+    ServerName inventario_fam.floopware.com
+    DocumentRoot /var/www/floopware/inventario_family/public
+
+    <Directory /var/www/floopware/inventario_family/public>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+    </Directory>
+
+    # Reverb solo es accesible localmente en 8081; Apache publica WSS por 443.
+    ProxyPass        /app  ws://127.0.0.1:8081/app
+    ProxyPassReverse /app  ws://127.0.0.1:8081/app
+    ProxyPass        /apps http://127.0.0.1:8081/apps
+    ProxyPassReverse /apps http://127.0.0.1:8081/apps
+
+    ErrorLog ${APACHE_LOG_DIR}/inventario-family-ssl-error.log
+    CustomLog ${APACHE_LOG_DIR}/inventario-family-ssl-access.log combined
+
+    # Ajusta estas rutas al certificado que realmente cubra el subdominio.
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/inventario_fam.floopware.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/inventario_fam.floopware.com/privkey.pem
+    Include /etc/letsencrypt/options-ssl-apache.conf
+</VirtualHost>
+</IfModule>
