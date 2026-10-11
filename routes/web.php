@@ -45,8 +45,10 @@ use App\Livewire\People\JobPositionsIndex;
 use App\Livewire\People\MyAbsences;
 use App\Livewire\People\ScheduleOverview;
 use App\Livewire\People\TimeClock;
+use App\Livewire\Profile\EditProfile;
 use App\Livewire\Profile\NotificationSettings;
 use App\Livewire\Public\LandingPage;
+use App\Livewire\Public\OrderTracking;
 use App\Livewire\Public\ProductCatalog;
 use App\Livewire\Public\SubmitTestimonial;
 use App\Livewire\Reservations\ReservationSettings;
@@ -57,6 +59,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingPage::class)->middleware(['module:landing', 'public-analytics'])->name('home');
 Route::get('/productos', ProductCatalog::class)->middleware(['module:landing', 'module:inventory', 'public-analytics'])->name('public.products');
+Route::get('/pedido/{sale:reference}', OrderTracking::class)->middleware(['module:landing', 'module:sales'])->name('public.orders.show');
 Route::post('/analitica/evento', [PublicAnalyticsController::class, 'store'])->middleware(['module:landing', 'throttle:120,1'])->name('public.analytics.store');
 Route::get('/politica-de-privacidad', [LegalPageController::class, 'privacy'])->middleware('module:landing')->name('public.privacy');
 Route::get('/aviso-legal', [LegalPageController::class, 'legalNotice'])->middleware('module:landing')->name('public.legal-notice');
@@ -72,6 +75,7 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::get('/panel', Dashboard::class)->name('dashboard');
     Route::get('/notificaciones', NotificationsIndex::class)->name('notifications.index');
+    Route::get('/mi-cuenta', EditProfile::class)->name('profile.edit');
     Route::get('/mi-cuenta/notificaciones', NotificationSettings::class)->name('profile.notifications');
     Route::middleware('module:inventory')->group(function (): void {
         Route::get('/inventario/productos', ProductsIndex::class)

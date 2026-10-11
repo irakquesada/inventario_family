@@ -75,7 +75,8 @@
             </fieldset>
         @endif
         <label class="flex items-center gap-2"><input wire:model="isActive" type="checkbox"> Producto activo</label>
-        <label class="flex items-center gap-2"><input wire:model="isSellable" type="checkbox"> Disponible para venta</label>
+        <label class="flex items-center gap-2"><input wire:model.live="isSellable" type="checkbox"> Disponible para venta</label>
+        @if($isSellable)<label class="flex items-start gap-2 rounded-xl bg-orange-50 p-3"><input wire:model="isOnlineSellable" type="checkbox" class="mt-1"><span><strong class="block">Disponible en tienda online</strong><span class="text-sm text-stone-600">Permite añadirlo al carrito público cuando la venta online esté activada.</span></span></label>@endif
         <label class="flex items-start gap-2"><input wire:model="featuredOnLanding" type="checkbox" class="mt-1"><span><strong class="block">Mostrar en la landing</strong><span class="text-sm text-stone-600">Lo incluye en productos destacados y, si tiene foto, en el carrusel.</span></span></label>@error('featuredOnLanding')<p class="text-sm text-red-600">{{ $message }}</p>@enderror
         <label class="flex items-start gap-2"><input wire:model="notifyLowStock" type="checkbox" class="mt-1"><span><strong class="block">Avisar por stock bajo</strong><span class="text-sm text-stone-600">Genera una alerta al cruzar el stock mínimo.</span></span></label>
         <div class="flex gap-2"><button class="rounded-xl bg-orange-700 px-4 py-2.5 font-semibold text-white">Guardar</button>@if($editingId)<button type="button" wire:click="resetForm" class="rounded-xl border border-stone-300 px-4 py-2.5">Cancelar</button>@endif</div>

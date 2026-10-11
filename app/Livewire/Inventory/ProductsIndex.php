@@ -58,6 +58,8 @@ class ProductsIndex extends Component
 
     public bool $isSellable = false;
 
+    public bool $isOnlineSellable = false;
+
     public bool $featuredOnLanding = false;
 
     public string $existingLandingImagePath = '';
@@ -165,6 +167,7 @@ class ProductsIndex extends Component
             'description' => ['nullable', 'string', 'max:5000'],
             'isActive' => ['boolean'],
             'isSellable' => ['boolean'],
+            'isOnlineSellable' => ['boolean'],
             'featuredOnLanding' => ['boolean'],
             'landingImage' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
@@ -217,6 +220,7 @@ class ProductsIndex extends Component
                 'description' => $data['description'],
                 'is_active' => $data['isActive'],
                 'is_sellable' => $data['isSellable'],
+                'is_online_sellable' => $data['isSellable'] && $data['isOnlineSellable'],
                 'featured_on_landing' => $data['featuredOnLanding'],
                 'landing_image_path' => $landingImagePath,
             ]);
@@ -272,6 +276,7 @@ class ProductsIndex extends Component
         $this->description = $product->description ?? '';
         $this->isActive = $product->is_active;
         $this->isSellable = $product->is_sellable;
+        $this->isOnlineSellable = $product->is_online_sellable;
         $this->featuredOnLanding = $product->featured_on_landing;
         $this->existingLandingImagePath = $product->landing_image_path ?? '';
         $this->landingImage = null;
@@ -304,6 +309,7 @@ class ProductsIndex extends Component
         $this->minimumStock = '0';
         $this->isActive = true;
         $this->isSellable = false;
+        $this->isOnlineSellable = false;
         $this->featuredOnLanding = false;
         $this->existingLandingImagePath = '';
         $this->landingImage = null;

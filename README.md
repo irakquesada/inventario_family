@@ -230,6 +230,25 @@ El sistema automatiza sumas, estados e histórico, pero los porcentajes fiscales
 
 Antes de generar documentos laborales definitivos, completa en **Plataforma → Identidad de la implantación** la razón social, identificador fiscal, cuenta de cotización y domicilio laboral.
 
+## Tienda online y recogidas
+
+La venta online se activa desde **Landing pública → Activar tienda online**. Debe seleccionarse un almacén activo para las recogidas. Cada producto requiere además las opciones **Disponible para venta** y **Disponible en tienda online**; esta doble confirmación evita publicar artículos accidentalmente.
+
+Los pedidos públicos se cobran al recoger. Al confirmarlos, el sistema reserva las existencias mediante movimientos auditados y genera una referencia `WEB-*`. El cliente recibe un enlace privado de seguimiento y el equipo puede avanzar el pedido desde **Ventas** por los estados confirmado, en preparación, listo y entregado. Cancelar o devolver restaura las existencias mediante el flujo de reembolso.
+
+## Réplica familiar
+
+El mismo código puede desplegarse como `inventario_family` sin mezclar datos. La identidad y la base de datos pertenecen al `.env` de esa instalación y nunca deben confirmarse en Git:
+
+```dotenv
+APP_NAME="Inventario Family"
+APP_BRAND_NAME="Inventario Family"
+DB_DATABASE=inventario_family
+PUBLIC_STORAGE_URL=/storage
+```
+
+Después de clonar el repositorio familiar, ejecuta el flujo normal de instalación, `php artisan migrate --seed`, `php artisan storage:link` y crea su administrador con `php artisan app:create-admin`. Cada instalación conserva su propio `.env`, base de datos, archivos subidos y `APP_KEY`.
+
 ## Comprobaciones del proyecto
 
 Antes de integrar cambios importantes:

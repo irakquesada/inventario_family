@@ -17,6 +17,7 @@ class Product extends Model
         'category_id', 'brand_id', 'name', 'slug', 'sku', 'barcode', 'description',
         'unit', 'cost', 'price', 'minimum_stock', 'notify_low_stock', 'tracks_lots',
         'requires_expiry', 'expiry_warning_days', 'is_active', 'is_sellable',
+        'is_online_sellable',
         'featured_on_landing',
         'landing_image_path',
     ];
@@ -33,6 +34,7 @@ class Product extends Model
             'expiry_warning_days' => 'integer',
             'is_active' => 'boolean',
             'is_sellable' => 'boolean',
+            'is_online_sellable' => 'boolean',
             'featured_on_landing' => 'boolean',
         ];
     }

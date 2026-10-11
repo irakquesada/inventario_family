@@ -6,6 +6,7 @@ use App\Events\LandingUpdated;
 use App\Models\Product;
 use App\Models\SiteSetting;
 use App\Models\Testimonial;
+use App\Models\Warehouse;
 use App\Support\MapLinks;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -44,6 +45,12 @@ class LandingSettings extends Component
 
     public bool $carouselEnabled = true;
 
+    public bool $onlineStoreEnabled = false;
+
+    public ?int $onlinePickupWarehouseId = null;
+
+    public string $onlineOrderInstructions = '';
+
     public bool $jobsEnabled = false;
 
     public string $jobsEmail = '';
@@ -78,6 +85,9 @@ class LandingSettings extends Component
         $this->reservationsEnabled = $settings->reservations_enabled;
         $this->testimonialsEnabled = $settings->testimonials_enabled;
         $this->carouselEnabled = $settings->carousel_enabled;
+        $this->onlineStoreEnabled = $settings->online_store_enabled;
+        $this->onlinePickupWarehouseId = $settings->online_pickup_warehouse_id;
+        $this->onlineOrderInstructions = (string) $settings->online_order_instructions;
         $this->jobsEnabled = $settings->jobs_enabled;
         $this->featuredProducts = Product::query()->where('featured_on_landing', true)->pluck('id')->map(fn ($id) => (string) $id)->all();
     }
@@ -95,6 +105,9 @@ class LandingSettings extends Component
             'facebookUrl' => ['nullable', 'url:https', 'max:1000'], 'jobsEmail' => ['nullable', 'email', 'max:255'],
             'reservationsEnabled' => ['boolean'], 'testimonialsEnabled' => ['boolean'], 'jobsEnabled' => ['boolean'],
             'carouselEnabled' => ['boolean'],
+            'onlineStoreEnabled' => ['boolean'],
+            'onlinePickupWarehouseId' => ['nullable', 'required_if:onlineStoreEnabled,true', 'integer', 'exists:warehouses,id'],
+            'onlineOrderInstructions' => ['nullable', 'string', 'max:2000'],
             'privacyPolicy' => ['nullable', 'string', 'max:50000'], 'legalNotice' => ['nullable', 'string', 'max:50000'],
             'featuredProducts' => ['array', 'max:8'], 'featuredProducts.*' => ['integer', 'exists:products,id'],
         ]);
@@ -113,6 +126,9 @@ class LandingSettings extends Component
                 'facebook_url' => $data['facebookUrl'] ?: null, 'reservations_enabled' => $data['reservationsEnabled'],
                 'testimonials_enabled' => $data['testimonialsEnabled'], 'jobs_enabled' => $data['jobsEnabled'],
                 'carousel_enabled' => $data['carouselEnabled'],
+                'online_store_enabled' => $data['onlineStoreEnabled'],
+                'online_pickup_warehouse_id' => $data['onlinePickupWarehouseId'],
+                'online_order_instructions' => $data['onlineOrderInstructions'] ?: null,
                 'jobs_email' => $data['jobsEmail'] ?: null,
                 'privacy_policy' => $data['privacyPolicy'] ?: null, 'legal_notice' => $data['legalNotice'] ?: null,
             ]);
@@ -205,6 +221,7 @@ class LandingSettings extends Component
             'testimonials' => Testimonial::query()
                 ->orderByRaw("CASE moderation_status WHEN 'pending' THEN 0 WHEN 'published' THEN 1 ELSE 2 END")
                 ->orderBy('sort_order')->latest('id')->get(),
+            'warehouses' => Warehouse::query()->where('is_active', true)->orderBy('name')->get(),
         ])->layout('layouts.app', ['title' => 'Landing pública']);
     }
 

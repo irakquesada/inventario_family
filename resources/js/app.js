@@ -49,6 +49,24 @@ document.addEventListener('click', (event) => {
     if (event.target.matches?.('dialog[data-dismiss-backdrop]')) event.target.close();
 });
 
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-share-catalog]');
+    if (!button) return;
+    const shareData = { title: button.dataset.shareTitle, text: `Descubre el catálogo de ${button.dataset.shareTitle.replace('Productos de ', '')}`, url: button.dataset.shareUrl };
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+        } else {
+            await navigator.clipboard.writeText(shareData.url);
+            const original = button.textContent;
+            button.textContent = '✓ Enlace copiado';
+            setTimeout(() => { button.textContent = original; }, 1800);
+        }
+    } catch (error) {
+        if (error.name !== 'AbortError') window.prompt('Copia este enlace para compartir el catálogo:', shareData.url);
+    }
+});
+
 document.addEventListener('error', (event) => {
     if (!event.target.matches?.('[data-catalog-image]')) return;
     event.target.classList.add('hidden');
