@@ -251,7 +251,7 @@ Después de clonar el repositorio familiar, ejecuta el flujo normal de instalaci
 
 ### Servicios de Inventario Family
 
-La implantación familiar usa nombres de servicio propios y Reverb en el puerto interno `8081`, para convivir con Inventario Pro en `8080`:
+La implantación familiar usa nombres de servicio propios y Reverb en el puerto interno fijo `8083`. La asignación prevista es `8081` para Inventario Pro, `8082` para Floop Publish y `8083` para Inventario Family. Los puertos no deben elegirse dinámicamente porque Apache necesita un destino estable:
 
 ```bash
 sudo cp deploy/systemd/inventario-family-queue.service /etc/systemd/system/
@@ -271,7 +271,7 @@ BROADCAST_CONNECTION=reverb
 QUEUE_CONNECTION=database
 VITE_REALTIME_ENABLED=true
 REVERB_SERVER_HOST=127.0.0.1
-REVERB_SERVER_PORT=8081
+REVERB_SERVER_PORT=8083
 REVERB_HOST=inventario-family.floopware.com
 REVERB_PORT=443
 REVERB_SCHEME=https
@@ -282,7 +282,7 @@ VITE_REVERB_PORT="${REVERB_PORT}"
 VITE_REVERB_SCHEME="${REVERB_SCHEME}"
 ```
 
-Antes de activarlo, comprueba que `8081` esté libre con `sudo ss -ltnp | grep ':8081'`; la ausencia de salida significa que puede utilizarse. Apache se instala en dos fases: `deploy/apache/inventario-family-http.conf.example` permite emitir el certificado y `deploy/apache/inventario-family-ssl.conf.example` activa HTTPS y WSS. El bloque proxy independiente permanece disponible para integraciones manuales.
+Antes de activarlo, comprueba que `8083` esté libre con `sudo ss -ltnp | grep ':8083'`; la ausencia de salida significa que puede utilizarse. La unidad systemd incluye además una comprobación previa y se negará a arrancar con un mensaje explícito si otro proceso ocupa el puerto. Apache se instala en dos fases: `deploy/apache/inventario-family-http.conf.example` permite emitir el certificado y `deploy/apache/inventario-family-ssl.conf.example` activa HTTPS y WSS. El bloque proxy independiente permanece disponible para integraciones manuales.
 
 Instalación de Apache desde cero:
 

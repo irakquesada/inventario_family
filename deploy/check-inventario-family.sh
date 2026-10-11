@@ -7,7 +7,7 @@ echo "== Servicios =="
 systemctl --no-pager --full status inventario-family-queue inventario-family-reverb
 
 echo "== Puerto Reverb local =="
-ss -ltnp | grep '127.0.0.1:8081'
+ss -ltnp | grep '127.0.0.1:8083'
 
 echo "== Laravel =="
 cd /var/www/floopware/inventario_family

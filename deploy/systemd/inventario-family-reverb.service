@@ -1,5 +1,5 @@
 [Unit]
-Description=Inventario Family - Laravel Reverb WebSocket server (port 8081)
+Description=Inventario Family - Laravel Reverb WebSocket server (port 8083)
 After=network.target mysql.service
 
 [Service]
@@ -7,7 +7,8 @@ Type=simple
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/floopware/inventario_family
-ExecStart=/usr/bin/php artisan reverb:start --host=127.0.0.1 --port=8081 --no-interaction
+ExecStartPre=/usr/bin/bash -c 'if /usr/bin/ss -ltnH "sport = :8083" | /usr/bin/grep -q .; then echo "ERROR: el puerto 8083 ya está ocupado; revisa el registro de puertos Reverb antes de iniciar Inventario Family."; exit 1; fi'
+ExecStart=/usr/bin/php artisan reverb:start --host=127.0.0.1 --port=8083 --no-interaction
 Restart=always
 RestartSec=5
 KillSignal=SIGTERM

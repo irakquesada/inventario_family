@@ -10,11 +10,11 @@
         DirectoryIndex index.php
     </Directory>
 
-    # Reverb permanece privado en 127.0.0.1:8081. Apache publica WSS en 443.
-    ProxyPass        /app  ws://127.0.0.1:8081/app
-    ProxyPassReverse /app  ws://127.0.0.1:8081/app
-    ProxyPass        /apps http://127.0.0.1:8081/apps
-    ProxyPassReverse /apps http://127.0.0.1:8081/apps
+    # Reverb permanece privado en 127.0.0.1:8083. Apache publica WSS en 443.
+    ProxyPass        /app  ws://127.0.0.1:8083/app
+    ProxyPassReverse /app  ws://127.0.0.1:8083/app
+    ProxyPass        /apps http://127.0.0.1:8083/apps
+    ProxyPassReverse /apps http://127.0.0.1:8083/apps
 
     SSLEngine on
     SSLCertificateFile /etc/letsencrypt/live/inventario-family.floopware.com/fullchain.pem
