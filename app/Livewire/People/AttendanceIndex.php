@@ -6,6 +6,7 @@ use App\Models\Employee;
 use App\Models\TimeEntry;
 use App\Services\People\AttendanceReport;
 use App\Services\People\CorrectTimeEntry;
+use App\Services\People\ManageTimeEntry;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -34,6 +35,20 @@ class AttendanceIndex extends Component
 
     public string $correctionReason = '';
 
+    public bool $creatingEntry = false;
+
+    public string $entryEmployeeId = '';
+
+    public string $entryIn = '';
+
+    public string $entryOut = '';
+
+    public string $entryReason = '';
+
+    public ?int $deletingId = null;
+
+    public string $deletionReason = '';
+
     public function mount(): void
     {
         if ($this->from === '') {
@@ -60,6 +75,59 @@ class AttendanceIndex extends Component
         $this->correctionOut = $entry->clocked_out_at?->format('Y-m-d\TH:i') ?? '';
         $this->correctionReason = '';
         $this->resetValidation();
+    }
+
+    public function openCreateEntry(): void
+    {
+        $this->authorizeManagement();
+        $this->creatingEntry = true;
+        $this->entryEmployeeId = $this->employeeId;
+        $this->entryIn = now()->format('Y-m-d\TH:i');
+        $this->entryOut = '';
+        $this->entryReason = '';
+        $this->resetValidation();
+    }
+
+    public function createEntry(ManageTimeEntry $manager): void
+    {
+        $this->authorizeManagement();
+        $data = $this->validate([
+            'entryEmployeeId' => ['required', 'integer', 'exists:employees,id'],
+            'entryIn' => ['required', 'date_format:Y-m-d\TH:i'],
+            'entryOut' => ['nullable', 'date_format:Y-m-d\TH:i'],
+            'entryReason' => ['required', 'string', 'min:5', 'max:1000'],
+        ]);
+        $manager->create(
+            Employee::query()->findOrFail($data['entryEmployeeId']), auth()->user(),
+            $data['entryIn'], $data['entryOut'] ?: null, $data['entryReason'], request()->ip(),
+        );
+        $this->cancelCreateEntry();
+        session()->flash('status', 'Fichaje añadido manualmente y auditado.');
+    }
+
+    public function cancelCreateEntry(): void
+    {
+        $this->reset(['creatingEntry', 'entryEmployeeId', 'entryIn', 'entryOut', 'entryReason']);
+        $this->resetValidation();
+    }
+
+    public function beginDelete(int $id): void
+    {
+        $this->authorizeManagement();
+        $this->deletingId = TimeEntry::query()->findOrFail($id)->id;
+        $this->deletionReason = '';
+    }
+
+    public function deleteEntry(ManageTimeEntry $manager): void
+    {
+        $this->authorizeManagement();
+        $data = $this->validate([
+            'deletingId' => ['required', 'integer', 'exists:time_entries,id'],
+            'deletionReason' => ['required', 'string', 'min:5', 'max:1000'],
+        ]);
+        $manager->delete(TimeEntry::query()->findOrFail($data['deletingId']), auth()->user(), $data['deletionReason'], request()->ip());
+        $this->reset(['deletingId', 'deletionReason']);
+        session()->flash('status', 'Fichaje anulado. El registro original y el motivo se conservan en auditoría.');
     }
 
     public function saveCorrection(CorrectTimeEntry $corrector): void

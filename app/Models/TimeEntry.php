@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TimeEntry extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['employee_id', 'recorded_by', 'clocked_in_at', 'clocked_out_at', 'source', 'ip_address', 'notes'];
 
     protected function casts(): array
@@ -27,6 +30,6 @@ class TimeEntry extends Model
 
     public function adjustments(): HasMany
     {
-        return $this->hasMany(TimeEntryAdjustment::class);
+        return $this->hasMany(TimeEntryAdjustment::class)->latest();
     }
 }

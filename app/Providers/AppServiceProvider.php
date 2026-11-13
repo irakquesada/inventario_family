@@ -24,6 +24,8 @@ use App\Models\ProductSupplier;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use App\Models\PurchaseReceipt;
+use App\Models\Rental;
+use App\Models\RentalRate;
 use App\Models\Reservation;
 use App\Models\ReservationResource;
 use App\Models\Sale;
@@ -32,6 +34,7 @@ use App\Models\SiteSetting;
 use App\Models\Supplier;
 use App\Models\Testimonial;
 use App\Models\TimeEntry;
+use App\Models\TimeEntryAdjustment;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Observers\AuditObserver;
@@ -61,8 +64,8 @@ class AppServiceProvider extends ServiceProvider
             Supplier::class, ProductSupplier::class, InventoryCount::class,
             PurchaseOrder::class, PurchaseOrderLine::class, PurchaseReceipt::class,
             ReservationResource::class, BusinessHour::class, BusinessClosure::class, Reservation::class,
-            SiteSetting::class, Testimonial::class, Sale::class, SaleItem::class,
-            Employee::class, EmployeeWorkPeriod::class, TimeEntry::class,
+            SiteSetting::class, Testimonial::class, Sale::class, SaleItem::class, Rental::class, RentalRate::class,
+            Employee::class, EmployeeWorkPeriod::class, TimeEntry::class, TimeEntryAdjustment::class,
             JobPosition::class,
             AbsenceType::class, AbsenceRequest::class, EmployeeAbsenceBalance::class,
             EmploymentContract::class, PayrollRun::class, PayrollEntry::class, PayrollEntryItem::class,

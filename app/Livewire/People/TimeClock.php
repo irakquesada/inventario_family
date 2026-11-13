@@ -3,6 +3,7 @@
 namespace App\Livewire\People;
 
 use App\Models\Employee;
+use App\Models\TimeEntry;
 use App\Services\People\ToggleTimeClock;
 use Carbon\CarbonImmutable;
 use Livewire\Attributes\Url;
@@ -54,8 +55,9 @@ class TimeClock extends Component
             return $end > $start ? $end - $start : ($end + 1440) - $start;
         });
 
-        $entries = $employee->timeEntries()->whereBetween('clocked_in_at', [$from, $to])->limit(500)->get();
-        $workedMinutes = $entries->sum(fn ($entry) => $entry->clocked_out_at ? $entry->clocked_in_at->diffInMinutes($entry->clocked_out_at) : 0);
+        $entries = TimeEntry::withTrashed()->with(['adjustments.user'])->where('employee_id', $employee->id)
+            ->whereBetween('clocked_in_at', [$from, $to])->latest('clocked_in_at')->limit(500)->get();
+        $workedMinutes = $entries->whereNull('deleted_at')->sum(fn ($entry) => $entry->clocked_out_at ? $entry->clocked_in_at->diffInMinutes($entry->clocked_out_at) : 0);
 
         return view('livewire.people.time-clock', [
             'employee' => $employee, 'openEntry' => $openEntry,

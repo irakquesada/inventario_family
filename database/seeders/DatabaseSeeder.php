@@ -37,6 +37,8 @@ class DatabaseSeeder extends Seeder
             'sales.create',
             'sales.manage',
             'sales.refund',
+            'rentals.view',
+            'rentals.manage',
             'payroll.view',
             'payroll.manage',
             'payroll.self',
@@ -48,7 +50,7 @@ class DatabaseSeeder extends Seeder
         $staff = Role::findOrCreate('staff');
         $staff->syncPermissions($permissions->only([
             'inventory.view', 'inventory.manage', 'inventory.adjust', 'inventory.count',
-            'reservations.view', 'reservations.manage', 'people.clock', 'sales.view', 'sales.create', 'payroll.self',
+            'reservations.view', 'reservations.manage', 'people.clock', 'sales.view', 'sales.create', 'rentals.view', 'payroll.self',
         ])->values());
 
         foreach ([

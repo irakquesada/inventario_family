@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TimeEntryAdjustment extends Model
 {
-    protected $fillable = ['time_entry_id', 'user_id', 'previous_clocked_in_at', 'previous_clocked_out_at', 'new_clocked_in_at', 'new_clocked_out_at', 'reason', 'ip_address'];
+    protected $fillable = ['time_entry_id', 'user_id', 'action', 'previous_clocked_in_at', 'previous_clocked_out_at', 'new_clocked_in_at', 'new_clocked_out_at', 'reason', 'ip_address'];
 
     protected function casts(): array
     {

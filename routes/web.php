@@ -51,6 +51,7 @@ use App\Livewire\Public\LandingPage;
 use App\Livewire\Public\OrderTracking;
 use App\Livewire\Public\ProductCatalog;
 use App\Livewire\Public\SubmitTestimonial;
+use App\Livewire\Rentals\RentalsIndex;
 use App\Livewire\Reservations\ReservationSettings;
 use App\Livewire\Reservations\ReservationsIndex;
 use App\Livewire\Sales\PosTerminal;
@@ -166,6 +167,9 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/ventas', SalesIndex::class)->middleware('can:sales.view')->name('sales.index');
         Route::get('/ventas/tpv', PosTerminal::class)->middleware('can:sales.create')->name('sales.pos');
         Route::get('/ventas/{sale}/ticket', SaleTicketController::class)->middleware('can:sales.view')->name('sales.ticket');
+    });
+    Route::middleware('module:rentals')->group(function (): void {
+        Route::get('/alquileres', RentalsIndex::class)->middleware('can:rentals.view')->name('rentals.index');
     });
     Route::middleware('module:people')->group(function (): void {
         Route::get('/personal', EmployeesIndex::class)->middleware('can:people.view')->name('people.employees.index');

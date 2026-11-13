@@ -2,7 +2,7 @@
 
 Núcleo modular para inventario, operaciones, reservas, catálogo y personal. La primera entrega prioriza el inventario y está diseñada para funcionar en móvil y ordenador.
 
-Incluye además un módulo de ventas/TPV activable: carrito táctil, cobro por almacén, tickets, historial, consumo FEFO y reembolsos auditables que restauran existencias sin alterar el movimiento original.
+Incluye además módulos activables de ventas/TPV y alquileres. El TPV ofrece carrito táctil, cobro por almacén, tickets, historial, consumo FEFO y reembolsos auditables. Alquileres añade tarifas por minuto, hora, día o periodo fijo, disponibilidad calculada sobre stock, salida, devolución escaneada y cálculo final.
 
 ## Requisitos locales
 
@@ -59,7 +59,15 @@ La respuesta del widget se valida en el servidor antes de comprobar las credenci
 
 El nombre, identificador, color, moneda, idioma y zona horaria se controlan desde `.env`. La configuración de marca está centralizada en `config/brand.php`; no se deben escribir nombres comerciales directamente en vistas o clases.
 
-El propietario técnico se define con `PLATFORM_OWNER_EMAIL`. Únicamente esa cuenta, estando activa y con rol `admin`, puede abrir **Plataforma**. El módulo exige volver a introducir la contraseña y el desbloqueo caduca a los 15 minutos por defecto. Desde allí pueden activarse o desactivarse Inventario, Landing, Reservas y Personal sin eliminar datos. Las rutas deshabilitadas también quedan bloqueadas; no se trata únicamente de ocultar enlaces.
+El propietario técnico se define con `PLATFORM_OWNER_EMAIL`. Únicamente esa cuenta, estando activa y con rol `admin`, puede abrir **Plataforma**. El módulo exige volver a introducir la contraseña y el desbloqueo caduca a los 15 minutos por defecto. Desde allí pueden activarse o desactivarse Inventario, Landing, Reservas, Personal, Ventas, Alquileres y Nóminas sin eliminar datos. Las rutas deshabilitadas también quedan bloqueadas; no se trata únicamente de ocultar enlaces.
+
+## Asistencia administrativa auditable
+
+Desde **Personal → Asistencia** un administrador autorizado puede añadir un fichaje olvidado, corregir sus horas o anularlo. Todas las acciones exigen motivo, registran usuario, IP, fecha, valores anteriores y nuevos, y aparecen en **Administración → Auditoría**. Las anulaciones utilizan borrado lógico: no alteran los totales, pero conservan el registro original. El empleado ve en **Mi fichaje** badges de alta administrativa, modificación o anulación y puede desplegar el historial con el motivo y responsable.
+
+## Alquileres
+
+El módulo `rentals` es independiente y desactivable. Un producto debe marcarse como **Producto alquilable** antes de recibir tarifas. Las tarifas admiten minuto, hora, día o importe fijo, unidades mínimas y minutos de cortesía. La disponibilidad se calcula como stock del almacén menos alquileres activos; una devolución libera la unidad automáticamente. El cierre puede localizarse por número de alquiler, UUID, SKU o código de barras y calcula el importe usando la tarifa congelada en el momento de la salida.
 
 ## Importación de productos
 

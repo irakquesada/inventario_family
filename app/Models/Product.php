@@ -17,7 +17,7 @@ class Product extends Model
         'category_id', 'brand_id', 'name', 'slug', 'sku', 'barcode', 'description',
         'unit', 'cost', 'price', 'minimum_stock', 'notify_low_stock', 'tracks_lots',
         'requires_expiry', 'expiry_warning_days', 'is_active', 'is_sellable',
-        'is_online_sellable',
+        'is_online_sellable', 'is_rentable',
         'featured_on_landing',
         'landing_image_path',
     ];
@@ -35,6 +35,7 @@ class Product extends Model
             'is_active' => 'boolean',
             'is_sellable' => 'boolean',
             'is_online_sellable' => 'boolean',
+            'is_rentable' => 'boolean',
             'featured_on_landing' => 'boolean',
         ];
     }
@@ -79,6 +80,11 @@ class Product extends Model
     public function purchaseOrderLines(): HasMany
     {
         return $this->hasMany(PurchaseOrderLine::class);
+    }
+
+    public function rentals(): HasMany
+    {
+        return $this->hasMany(Rental::class);
     }
 
     public function preferredSupplierReference(): HasOne
