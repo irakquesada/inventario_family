@@ -274,6 +274,9 @@ document.addEventListener('livewire:init', () => {
     window.Echo.private('sales').listen('.sales.changed', (event) => {
         Livewire.dispatch('sales-changed', event);
     });
+    window.Echo.private('rentals').listen('.rentals.changed', (event) => {
+        Livewire.dispatch('rentals-changed', event);
+    });
 });
 
 document.addEventListener('click', (event) => {

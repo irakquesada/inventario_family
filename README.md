@@ -67,7 +67,9 @@ Desde **Personal → Asistencia** un administrador autorizado puede añadir un f
 
 ## Alquileres
 
-El módulo `rentals` es independiente y desactivable. Un producto debe marcarse como **Producto alquilable** antes de recibir tarifas. Las tarifas admiten minuto, hora, día o importe fijo, unidades mínimas y minutos de cortesía. La disponibilidad se calcula como stock del almacén menos alquileres activos; una devolución libera la unidad automáticamente. El cierre puede localizarse por número de alquiler, UUID, SKU o código de barras y calcula el importe usando la tarifa congelada en el momento de la salida.
+El módulo `rentals` es independiente y desactivable. Un producto debe marcarse como **Producto alquilable** antes de recibir tarifas. Las tarifas admiten minuto, hora, día o importe fijo, unidades mínimas y minutos de cortesía. La disponibilidad se calcula como stock del almacén menos reservas y alquileres activos; una devolución libera la unidad automáticamente. El cierre puede localizarse por número de alquiler, UUID, SKU o código de barras y calcula el importe usando la tarifa congelada en el momento de la salida.
+
+Las solicitudes públicas pueden capturarse mediante un QR limitado y revocable. El administrador revisa, modifica y confirma la reserva antes de enviar al cliente un correo con tarifa, horarios, cortesías e importe estimado. Los anticipos y liquidaciones se cobran desde el TPV y se incorporan al historial de ventas sin generar movimientos de stock duplicados. El estado operativo y el económico —pendiente, parcial o pagado— se mantienen separados y auditados.
 
 ## Importación de productos
 

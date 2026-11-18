@@ -60,9 +60,11 @@ class SalesIndex extends Component
     public function refund(RefundSale $service): void
     {
         abort_unless(auth()->user()?->can('sales.refund'), 403);
-        $service->handle(Sale::query()->findOrFail($this->refundingSaleId), auth()->user(), $this->refundReason);
+        $sale = Sale::query()->findOrFail($this->refundingSaleId);
+        $isRental = $sale->channel === 'rental';
+        $service->handle($sale, auth()->user(), $this->refundReason);
         $this->cancelRefund();
-        session()->flash('status', 'Venta reembolsada y existencias restauradas correctamente.');
+        session()->flash('status', $isRental ? 'Cobro de alquiler reembolsado; el saldo pendiente se actualizó sin alterar existencias.' : 'Venta reembolsada y existencias restauradas correctamente.');
     }
 
     public function advanceOnlineOrder(int $saleId): void

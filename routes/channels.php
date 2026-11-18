@@ -9,3 +9,4 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 Broadcast::channel('inventory', fn ($user) => $user->can('inventory.view'));
 Broadcast::channel('analytics', fn ($user) => $user->can('audit.view'));
 Broadcast::channel('sales', fn ($user) => $user->can('sales.view'));
+Broadcast::channel('rentals', fn ($user) => $user->can('rentals.view') || $user->can('sales.create'));

@@ -3,6 +3,7 @@
 namespace App\Services\Sales;
 
 use App\Events\SaleChanged;
+use App\Models\RentalPayment;
 use App\Models\Sale;
 use App\Models\User;
 use App\Services\Inventory\LotStock;
@@ -27,14 +28,20 @@ class RefundSale
                 throw ValidationException::withMessages(['refundReason' => 'Esta venta ya no admite devolución.']);
             }
             $previous = $sale->status;
-            $sale->load(['items.product', 'items.stockMovement.lotAllocations.lot', 'warehouse']);
+            $sale->load(['items.product', 'items.stockMovement.lotAllocations.lot', 'warehouse', 'rentalPayments']);
             foreach ($sale->items as $item) {
+                if ($item->rental_id) {
+                    continue;
+                }
                 $metadata = ['sale_id' => $sale->id, 'sale_number' => $sale->number, 'reverses_movement_id' => $item->stock_movement_id];
                 if ($item->product->tracks_lots) {
                     $this->lotStock->restore($item->stockMovement, $user, "Devolución {$sale->number}: {$reason}", $metadata, $sale->reference);
                 } else {
                     $this->recorder->handle($item->product, $sale->warehouse, 'sale_return', (float) $item->quantity, $user, "Devolución {$sale->number}: {$reason}", $metadata, $sale->reference);
                 }
+            }
+            foreach ($sale->rentalPayments as $payment) {
+                RentalPayment::query()->create(['rental_id' => $payment->rental_id, 'sale_id' => $sale->id, 'created_by' => $user->id, 'amount' => -abs((float) $payment->amount), 'kind' => 'refund']);
             }
             $sale->update(['status' => 'refunded', 'cancelled_at' => now(), 'cancelled_by' => $user->id, 'cancellation_reason' => trim($reason)]);
             $sale->statusHistory()->create(['user_id' => $user->id, 'from_status' => $previous, 'to_status' => 'refunded', 'notes' => trim($reason)]);

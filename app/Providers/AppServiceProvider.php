@@ -25,6 +25,8 @@ use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use App\Models\PurchaseReceipt;
 use App\Models\Rental;
+use App\Models\RentalInvitation;
+use App\Models\RentalPayment;
 use App\Models\RentalRate;
 use App\Models\Reservation;
 use App\Models\ReservationResource;
@@ -64,7 +66,7 @@ class AppServiceProvider extends ServiceProvider
             Supplier::class, ProductSupplier::class, InventoryCount::class,
             PurchaseOrder::class, PurchaseOrderLine::class, PurchaseReceipt::class,
             ReservationResource::class, BusinessHour::class, BusinessClosure::class, Reservation::class,
-            SiteSetting::class, Testimonial::class, Sale::class, SaleItem::class, Rental::class, RentalRate::class,
+            SiteSetting::class, Testimonial::class, Sale::class, SaleItem::class, Rental::class, RentalRate::class, RentalInvitation::class, RentalPayment::class,
             Employee::class, EmployeeWorkPeriod::class, TimeEntry::class, TimeEntryAdjustment::class,
             JobPosition::class,
             AbsenceType::class, AbsenceRequest::class, EmployeeAbsenceBalance::class,

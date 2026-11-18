@@ -50,6 +50,7 @@ use App\Livewire\Profile\NotificationSettings;
 use App\Livewire\Public\LandingPage;
 use App\Livewire\Public\OrderTracking;
 use App\Livewire\Public\ProductCatalog;
+use App\Livewire\Public\SubmitRentalRequest;
 use App\Livewire\Public\SubmitTestimonial;
 use App\Livewire\Rentals\RentalsIndex;
 use App\Livewire\Reservations\ReservationSettings;
@@ -65,6 +66,7 @@ Route::post('/analitica/evento', [PublicAnalyticsController::class, 'store'])->m
 Route::get('/politica-de-privacidad', [LegalPageController::class, 'privacy'])->middleware('module:landing')->name('public.privacy');
 Route::get('/aviso-legal', [LegalPageController::class, 'legalNotice'])->middleware('module:landing')->name('public.legal-notice');
 Route::get('/opinar/{token}', SubmitTestimonial::class)->middleware(['module:landing', 'throttle:30,1'])->name('public.testimonials.submit');
+Route::get('/solicitar-alquiler/{token}', SubmitRentalRequest::class)->middleware(['module:rentals', 'throttle:30,1'])->name('public.rentals.submit');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/iniciar-sesion', [AuthenticatedSessionController::class, 'create'])->name('login');

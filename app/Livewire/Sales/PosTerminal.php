@@ -4,8 +4,11 @@ namespace App\Livewire\Sales;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Rental;
 use App\Models\Warehouse;
+use App\Services\Rentals\ChargeRental;
 use App\Services\Sales\CreatePosSale;
+use App\Support\ModuleManager;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -34,6 +37,12 @@ class PosTerminal extends Component
 
     public ?int $lastSaleId = null;
 
+    public ?int $chargingRentalId = null;
+
+    public string $rentalPaymentAmount = '';
+
+    public string $rentalPaymentMethod = 'cash';
+
     public function mount(): void
     {
         $this->warehouseId = Warehouse::query()->where('is_active', true)->value('id');
@@ -41,6 +50,31 @@ class PosTerminal extends Component
 
     #[On('inventory-changed')]
     public function refreshStock(): void {}
+
+    #[On('sales-changed')]
+    public function refreshSales(): void {}
+
+    #[On('rentals-changed')]
+    public function refreshRentals(): void {}
+
+    public function beginRentalCharge(int $rentalId): void
+    {
+        abort_unless(auth()->user()?->can('sales.create'), 403);
+        $rental = Rental::query()->withSum('payments', 'amount')->whereIn('status', ['reserved', 'active', 'returned'])->findOrFail($rentalId);
+        $this->chargingRentalId = $rental->id;
+        $this->rentalPaymentAmount = number_format($rental->amountDue(), 2, '.', '');
+    }
+
+    public function chargeRental(ChargeRental $service): void
+    {
+        abort_unless(auth()->user()?->can('sales.create'), 403);
+        $data = $this->validate(['chargingRentalId' => ['required', 'integer', 'exists:rentals,id'], 'rentalPaymentAmount' => ['required', 'numeric', 'gt:0'], 'rentalPaymentMethod' => ['required', Rule::in(['cash', 'card', 'transfer', 'other'])]]);
+        $sale = $service->handle(Rental::query()->findOrFail($data['chargingRentalId']), auth()->user(), (float) $data['rentalPaymentAmount'], $data['rentalPaymentMethod']);
+        $this->reset(['chargingRentalId', 'rentalPaymentAmount']);
+        $this->rentalPaymentMethod = 'cash';
+        $this->lastSaleId = $sale->id;
+        session()->flash('status', 'Cobro de alquiler registrado en la venta '.$sale->number.'.');
+    }
 
     public function updatedSearch(): void
     {
@@ -120,10 +154,14 @@ class PosTerminal extends Component
         })->filter()->values();
         $subtotal = round((float) $cartRows->sum('total'), 2);
 
+        $rentalsEnabled = app(ModuleManager::class)->enabled('rentals');
+
         return view('livewire.sales.pos-terminal', [
             'products' => $products, 'cartRows' => $cartRows, 'subtotal' => $subtotal,
             'categories' => Category::query()->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(),
             'warehouses' => Warehouse::query()->where('is_active', true)->orderBy('name')->get(),
+            'rentalsEnabled' => $rentalsEnabled,
+            'chargeableRentals' => $rentalsEnabled ? Rental::query()->with(['product', 'rate'])->withSum('payments', 'amount')->whereIn('status', ['reserved', 'active', 'returned'])->latest()->get()->filter(fn (Rental $rental) => $rental->amountDue() > 0.001)->take(30) : collect(),
         ])->layout('layouts.app', ['title' => 'Punto de venta']);
     }
 }

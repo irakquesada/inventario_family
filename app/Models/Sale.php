@@ -41,4 +41,9 @@ class Sale extends Model
     {
         return $this->hasMany(SaleStatusHistory::class);
     }
+
+    public function rentalPayments(): HasMany
+    {
+        return $this->hasMany(RentalPayment::class);
+    }
 }
